@@ -97,16 +97,18 @@ def backend_neal(Q, S, n_reads=100, init=None):
     best_sample = response.first.sample
     return {v: best_sample[v] for v in S if v in best_sample}
 
+
 def backend_sbm(Q, S, n_reads=200, init=None):
     """
     Simulated Bifurcation Machine backend.
     Uses PyTorch-based SBM as the local QUBO solver.
 
-    Faster than neal (3-6x more iterations in same budget)
-    and better at escaping local minima on medium/dense graphs.
+    Automatically routes to neal for sparse subproblems
+    (avg degree < 5) where SBM has convergence issues.
+    Uses SBM only for dense subproblems where it excels.
 
-    Uses dSB mode for k>=300 (better quality, quasi-tunnelling).
-    Uses bSB mode for k<300 (faster, sufficient quality).
+    Uses discrete mode for k>=300 (better quality).
+    Uses ballistic mode for k<300 (faster).
 
     Parameters
     ----------
@@ -122,8 +124,6 @@ def backend_sbm(Q, S, n_reads=200, init=None):
     try:
         import torch
         from simulated_bifurcation import maximize
-        from simulated_bifurcation.optimizer.simulated_bifurcation_engine \
-            import SimulatedBifurcationEngine
 
         n = len(S)
         if n == 0:
@@ -133,9 +133,6 @@ def backend_sbm(Q, S, n_reads=200, init=None):
         idx = {v: i for i, v in enumerate(S)}
 
         # build QUBO matrix as torch tensor
-        # SBM maximises x^T J x + h^T x
-        # our QUBO minimises sum Q[(i,j)] xi xj
-        # convert: maximise negative of QUBO
         J = torch.zeros(n, n, dtype=torch.float32)
         h = torch.zeros(n, dtype=torch.float32)
 
@@ -149,7 +146,13 @@ def backend_sbm(Q, S, n_reads=200, init=None):
                 J[ii, jj] -= float(val) / 2.0
                 J[jj, ii] -= float(val) / 2.0
 
-       
+        # ── density check — SBM needs dense subproblems ──────────
+        edge_count = (J != 0).sum().item() // 2
+        avg_degree = (2 * edge_count) / max(n, 1)
+        if avg_degree < 5:
+            # sparse subproblem — fall back to neal
+            return backend_neal(Q, S, n_reads=n_reads, init=init)
+
         # choose mode based on problem size
         mode = "discrete" if n >= 300 else "ballistic"
 
@@ -158,7 +161,7 @@ def backend_sbm(Q, S, n_reads=200, init=None):
             J, h,
             agents=n_reads,
             mode=mode,
-            max_steps=10000,
+            max_steps=500,
             verbose=False,
             domain='spin'
         )
