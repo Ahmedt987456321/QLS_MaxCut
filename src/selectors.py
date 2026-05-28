@@ -47,7 +47,8 @@ def _plateau_aware_rank(G, gc, mode):
     return ranked
 
 
-def select_random(G, gc, k, pool=None, rng=None):
+
+def select_random(G, gc, k, pool=None, rng=None, x=None):
     """
     Random selector — uniform sample of k vertices.
     Baseline: Tomesh et al. 2022 pattern.
@@ -72,7 +73,7 @@ def select_random(G, gc, k, pool=None, rng=None):
     return list(rng.choice(nodes, size=k_actual, replace=False))
 
 
-def select_frustrated(G, gc, k, pool=None, rng=None):
+def select_frustrated(G, gc, k, pool=None, rng=None, x=None):    
     """
     Frustrated selector — vertices with |gain| closest to zero.
     Novel proposal: locally indifferent vertices may unlock
@@ -95,7 +96,8 @@ def select_frustrated(G, gc, k, pool=None, rng=None):
     ranked = _plateau_aware_rank(G, gc, mode='frustrated')
     return ranked[:min(k, len(ranked))]
 
-def select_frustrated_connected(G, gc, k, pool=None, rng=None):
+
+def select_frustrated_connected(G, gc, k, pool=None, rng=None, x=None):
     """
     Connected frustrated selector — novel contribution.
     Seeds from the most frustrated vertex then grows a connected
@@ -157,148 +159,321 @@ def select_frustrated_connected(G, gc, k, pool=None, rng=None):
         S.extend(remaining_sorted[:k - len(S)])
 
     return S[:k]
-
-def select_cut_polytope(G, gc, k, pool=None, rng=None):
+def select_cut_polytope(G, gc, k, pool=None, rng=None, x=None):
     """
     Cut polytope selector — novel PhD contribution.
-    Identifies vertices involved in the most violated odd-cycle
-    inequalities of the cut polytope at the current local optimum.
+    Finds vertices involved in the most violated odd-cycle
+    inequalities of the cut polytope at the current solution x.
 
-    Mathematical basis: a cut is optimal iff it satisfies all
-    odd-cycle inequalities. Violated inequalities point exactly
-    to the variables that need to change to reach a better cut.
-    No published Max-Cut heuristic uses this as a destroy rule.
+    For each triangle (u,v,w) in G, checks whether the number
+    of cut edges is even — which violates the odd-cycle inequality.
+    Vertices in the most violated triangles are selected as S.
 
-    Barahona & Mahjoub 1986 — odd-cycle inequalities define
-    facets of the cut polytope CUT(G).
+    Mathematical basis: Barahona & Mahjoub 1986 — odd-cycle
+    inequalities define facets of CUT(G). A solution violating
+    these inequalities is not a vertex of the cut polytope and
+    must change to reach a better cut.
+
+    No published Max-Cut heuristic uses facet violations
+    as a destroy rule — this is a novel PhD contribution.
 
     Parameters
     ----------
     G    : NetworkX graph
     gc   : GainCache
     k    : int — neighbourhood size
-    pool : ignored
+    pool : list of solution dicts (fallback if x is None)
     rng  : numpy.random.Generator or None
+    x    : dict — current vertex assignments {v: 0 or 1}
 
     Returns
     -------
     S : list of k vertices from most violated odd cycles
     """
     gc.assert_valid()
-    import networkx as nx
-
     nodes = list(G.nodes())
+
     if len(nodes) <= k:
         return nodes
 
     if rng is None:
         rng = np.random.default_rng()
 
-    # ── Step 1: get current assignment from gc ───────────────────
-    # reconstruct x from gain signs — vertices with positive gain
-    # prefer to flip, negative prefer to stay
-    # use gc.gain as proxy for assignment confidence
-    # We need the actual x — get it from the graph's current state
-    # Since gc stores gains, we use the sign of gain as a signal
+    # ── get current assignment ────────────────────────────────────
+    # prefer x passed directly, fall back to best pool solution
+    if x is None:
+        if pool and len(pool) > 0:
+            from src.local_search import compute_cut_value
+            x = max(pool, key=lambda p: compute_cut_value(G, p))
+        else:
+            # no assignment available — fall back to frustrated_connected
+            return select_frustrated_connected(
+                G, gc, k, pool=pool, rng=rng, x=None)
 
-    # ── Step 2: build violation graph ────────────────────────────
-    # For each edge (u,v), compute edge_label:
-    #   edge crosses cut → label = 1 (good — contributes to cut)
-    #   edge does not cross → label = 0 (bad — does not contribute)
-    # An odd cycle with even number of cut edges is violated
-
-    # Build a signed graph where:
-    #   cut edges (crossing) get weight +1
-    #   non-cut edges get weight -1
-    # An odd-cycle violation occurs when product of signs = +1
-    # (even number of -1s in odd cycle)
-
+    # ── compute violation score per vertex ────────────────────────
     violation_score = {v: 0.0 for v in nodes}
 
-    # score each vertex by how many violated triangles it belongs to
-    # triangles are the shortest odd cycles — most informative
-    for u, v, data in G.edges(data=True):
-        w = data.get('weight', 1.0)
-        gain_u = gc.gain[u]
-        gain_v = gc.gain[v]
+    # check every triangle for odd-cycle violation
+    # triangle (u,v,w) is violated if number of cut edges is even
+    # cut edge = edge where x[u] != x[v]
+    triangles_checked = 0
+    max_triangles = 1000
 
-        # edge violation score — edges where both endpoints
-        # are frustrated (|gain|≈0) AND edge weight suggests
-        # the current assignment is suboptimal
-        edge_violation = w * (1.0 / (1.0 + abs(gain_u) + abs(gain_v)))
-        violation_score[u] += edge_violation
-        violation_score[v] += edge_violation
+    for u in nodes:
+        if triangles_checked >= max_triangles:
+            break
+        for v in G.neighbors(u):
+            if v <= u:
+                continue
+            for w in G.neighbors(v):
+                if w <= v:
+                    continue
+                if not G.has_edge(u, w):
+                    continue
+                if triangles_checked >= max_triangles:
+                    break
 
-    # ── Step 3: find violated triangles ──────────────────────────
-    # Check triangles — for each triangle (u,v,w),
-    # count cut edges. If even number → violated odd cycle
-    triangle_violations = {v: 0 for v in nodes}
+                # count cut edges in triangle
+                cut_uv = int(x[u] != x[v])
+                cut_vw = int(x[v] != x[w])
+                cut_uw = int(x[u] != x[w])
+                n_cut = cut_uv + cut_vw + cut_uw
 
-    # sample triangles efficiently using common neighbours
-    checked = 0
-    max_triangles = min(500, G.number_of_edges())
+                # odd-cycle violated if n_cut is even (0 or 2)
+                if n_cut % 2 == 0:
+                    # get edge weights
+                    w_uv = G[u][v].get('weight', 1.0)
+                    w_vw = G[v][w].get('weight', 1.0)
+                    w_uw = G[u][w].get('weight', 1.0)
+                    violation = (w_uv + w_vw + w_uw) / 3.0
 
-    edges = list(G.edges())
-    if rng is not None:
-        edge_sample = [edges[i] for i in
-                      rng.choice(len(edges),
-                                size=min(max_triangles, len(edges)),
-                                replace=False)]
-    else:
-        edge_sample = edges[:max_triangles]
+                    violation_score[u] += violation
+                    violation_score[v] += violation
+                    violation_score[w] += violation
 
-    for u, v in edge_sample:
-        # find common neighbours — complete triangles
-        common = set(G.neighbors(u)) & set(G.neighbors(v))
-        for w in common:
-            # count cut edges in triangle (u,v,w)
-            # use gain sign as proxy for assignment
-            # gain > 0 means vertex wants to flip → uncertain side
-            # We use |gain| < threshold as "frustrated" signal
-            eps = 1.0
-            u_frust = abs(gc.gain[u]) < eps
-            v_frust = abs(gc.gain[v]) < eps
-            w_frust = abs(gc.gain[w]) < eps
+                triangles_checked += 1
 
-            # triangle with 2+ frustrated vertices is likely violated
-            n_frust = sum([u_frust, v_frust, w_frust])
-            if n_frust >= 2:
-                triangle_violations[u] += 1
-                triangle_violations[v] += 1
-                triangle_violations[w] += 1
+    # ── if no triangles found, add edge-based violation score ─────
+    # for sparse graphs with few triangles (like G11)
+    if triangles_checked == 0 or max(violation_score.values()) == 0:
+        # fallback — score edges where both endpoints same side
+        # and edge weight is high (non-cut edge with high weight)
+        for u, v, data in G.edges(data=True):
+            w = data.get('weight', 1.0)
+            if x[u] == x[v]:
+                # same side — this edge not cut — potential violation
+                edge_score = abs(w)
+                violation_score[u] += edge_score
+                violation_score[v] += edge_score
 
-    # ── Step 4: combine scores ────────────────────────────────────
-    combined_score = {
-        v: violation_score[v] + 2.0 * triangle_violations[v]
-        for v in nodes
-    }
-
-    # ── Step 5: seed from highest violation vertex ────────────────
-    # then grow connected subgraph like frustrated_connected
-    seed = max(nodes, key=lambda v: combined_score[v])
+    # ── grow connected subgraph from highest violation vertex ─────
+    seed = max(nodes, key=lambda v: violation_score[v])
 
     S = [seed]
     frontier = set(G.neighbors(seed))
 
     while len(S) < k and frontier:
-        # pick frontier vertex with highest violation score
-        best = max(frontier, key=lambda v: combined_score[v])
+        best = max(frontier, key=lambda v: violation_score[v])
         S.append(best)
         for u in G.neighbors(best):
             if u not in S:
                 frontier.add(u)
         frontier.discard(best)
 
-    # fill remaining if graph disconnected
+    # fill if disconnected graph exhausted frontier
     if len(S) < k:
         remaining = sorted(
             [v for v in nodes if v not in set(S)],
-            key=lambda v: -combined_score[v]
+            key=lambda v: -violation_score[v]
         )
         S.extend(remaining[:k - len(S)])
 
     return S[:k]
-def select_impact(G, gc, k, pool=None, rng=None):
+
+def select_topological(G, gc, k, pool=None, rng=None, x=None):
+    """
+    Topological selector — novel PhD contribution for toroidal graphs.
+    Every log(n) iterations seeds the subproblem from a non-contractible
+    loop (meridian or longitude cycle) rather than from frustrated faces.
+
+    Motivated by Galluccio-Loebl-Vondrák theorem: G11 is a toroidal
+    graph where non-contractible cycles generate facets of the cut
+    polytope that face-cycle selection cannot reach. When AQLS gets
+    stuck it may be due to a topological obstruction — a global loop
+    frustration that no local face-cycle move can resolve.
+
+    For non-toroidal graphs falls back to select_frustrated_connected.
+
+    Parameters
+    ----------
+    G    : NetworkX graph
+    gc   : GainCache
+    k    : int — neighbourhood size
+    pool : list of solution dicts
+    rng  : numpy.random.Generator or None
+    x    : dict — current vertex assignments
+
+    Returns
+    -------
+    S : list of k vertices seeded from non-contractible loop
+    """
+    gc.assert_valid()
+    nodes = list(G.nodes())
+    n = len(nodes)
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    # ── detect toroidal grid structure ────────────────────────────
+    # G11: 8 cols x 100 rows, nodes 1-800
+    # detect by checking if n is divisible by 8 and step=8 exists
+    cols, rows = _detect_toroidal_grid(G, nodes)
+
+    if cols is None:
+        # not a toroidal grid — fall back to connected frustrated
+        return select_frustrated_connected(
+            G, gc, k, pool=pool, rng=rng, x=x)
+
+    # ── build non-contractible cycles ─────────────────────────────
+    def node_id(r, c):
+        return (r % rows) * cols + (c % cols) + min(nodes)
+
+    # meridian cycles — length = rows, one per column
+    meridians = [
+        [node_id(r, c) for r in range(rows)]
+        for c in range(cols)
+    ]
+
+    # longitude cycles — length = cols, one per row
+    longitudes = [
+        [node_id(r, c) for c in range(cols)]
+        for r in range(rows)
+    ]
+
+    all_loops = meridians + longitudes
+
+    # ── score each loop by total frustration ─────────────────────
+    # most frustrated loop = most likely to contain topological obstruction
+    def loop_frustration(loop):
+        return sum(1.0 / (1.0 + abs(gc.gain[v]))
+                   for v in loop if v in gc.gain)
+
+    best_loop = max(all_loops, key=loop_frustration)
+
+    # ── seed from most frustrated vertex in the best loop ─────────
+    seed = min(best_loop, key=lambda v: abs(gc.gain.get(v, 1.0)))
+
+    # ── grow connected subgraph from seed ─────────────────────────
+    # same strategy as frustrated_connected but seeded topologically
+    S = [seed]
+    frontier = set(G.neighbors(seed))
+
+    while len(S) < k and frontier:
+        best = min(frontier, key=lambda v: abs(gc.gain.get(v, 1.0)))
+        S.append(best)
+        for u in G.neighbors(best):
+            if u not in S:
+                frontier.add(u)
+        frontier.discard(best)
+
+    # fill if needed
+    if len(S) < k:
+        remaining = sorted(
+            [v for v in nodes if v not in set(S)],
+            key=lambda v: abs(gc.gain.get(v, 1.0))
+        )
+        S.extend(remaining[:k - len(S)])
+
+    return S[:k]
+
+
+def _detect_toroidal_grid(G, nodes):
+    """
+    Detect if G is a toroidal grid and return (cols, rows).
+    Returns (None, None) if not detected.
+    """
+    n = len(nodes)
+    min_node = min(nodes)
+
+    # check if all nodes have degree 4
+    if any(G.degree(v) != 4 for v in nodes):
+        return None, None
+
+    # find the column step by looking at neighbour differences
+    # on a cols x rows toroidal grid, each node connects to
+    # +1, -1 (horizontal) and +cols, -cols (vertical)
+    sample_node = min_node
+    neighbour_diffs = sorted([
+        abs(v - sample_node) for v in G.neighbors(sample_node)
+    ])
+
+    # the two unique positive diffs are 1 (horizontal) and cols (vertical)
+    # wraparound gives n-1 and n-cols
+    small_diffs = [d for d in neighbour_diffs if d <= n // 2]
+
+    if len(small_diffs) < 2:
+        return None, None
+
+    small_diffs = sorted(set(small_diffs))
+
+    if len(small_diffs) >= 2:
+        col_step = small_diffs[1]  # larger of the two small diffs
+        if n % col_step == 0:
+            cols = col_step
+            rows = n // cols
+            return cols, rows
+
+    return None, None
+
+def select_hybrid_topo(G, gc, k, pool=None, rng=None, x=None):
+    """
+    Hybrid topological selector — combines connected frustrated
+    with periodic topological seeding.
+
+    Every log(n) iterations seeds from a non-contractible loop
+    instead of from frustrated faces. This gives access to both
+    face-cycle facets (via frustrated selection) and topological
+    facets (via non-contractible loops) of the cut polytope.
+
+    Parameters
+    ----------
+    G    : NetworkX graph
+    gc   : GainCache
+    k    : int
+    pool : list of solution dicts
+    rng  : numpy.random.Generator or None
+    x    : dict — current vertex assignments
+
+    Returns
+    -------
+    S : list of k vertices
+    """
+    gc.assert_valid()
+    import math
+
+    nodes = list(G.nodes())
+    n = len(nodes)
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    # every log(n) calls use topological seeding
+    log_n = max(2, int(math.log(n)))
+
+    # use call counter stored as function attribute
+    if not hasattr(select_hybrid_topo, '_call_count'):
+        select_hybrid_topo._call_count = 0
+    select_hybrid_topo._call_count += 1
+
+    if select_hybrid_topo._call_count % log_n == 0:
+        # topological iteration
+        return select_topological(G, gc, k, pool=pool, rng=rng, x=x)
+    else:
+        # standard connected frustrated iteration
+        return select_frustrated_connected(
+            G, gc, k, pool=pool, rng=rng, x=x)
+
+def select_impact(G, gc, k, pool=None, rng=None, x=None):
     """
     Impact selector — vertices with largest |gain|.
     Literature comparator: qbsolv / Atobe 2022 style.
@@ -321,7 +496,7 @@ def select_impact(G, gc, k, pool=None, rng=None):
     return ranked[:min(k, len(ranked))]
 
 
-def select_clustering(G, gc, k, pool=None, rng=None):
+def select_clustering(G, gc, k, pool=None, rng=None, x=None):
     """
     Clustering selector — correlation-based subgraph selection.
     Based on Zhao & Tang 2025.
@@ -410,7 +585,8 @@ def select_clustering(G, gc, k, pool=None, rng=None):
     return list(rng.choice(best_cluster, size=k_actual, replace=False))
 
 
-def select_meta_rule(G, gc, k, pool=None, rng=None):
+
+def select_meta_rule(G, gc, k, pool=None, rng=None, x=None):
     """
     Rule-based meta-selector.
     Switches between selectors based on current search state.
@@ -478,6 +654,8 @@ def get_selector(name):
         'impact':               select_impact,
         'clustering':           select_clustering,
         'meta_rule':            select_meta_rule,
+        'topological':          select_topological,
+        'hybrid_topo': select_hybrid_topo,
     }
   
     

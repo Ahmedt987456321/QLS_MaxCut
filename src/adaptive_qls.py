@@ -99,7 +99,7 @@ def adaptive_qls(G, budget_seconds, selector, backend,
         # ── Phase 4: pluggable selector ───────────────────────────
         k_actual = min(k, len(nodes))
         try:
-            S = selector(G, gc, k_actual, pool=pool, rng=rng)
+            S = selector(G, gc, k_actual, pool=pool, rng=rng, x=x)
         except Exception:
             # fallback to random if selector fails
             S = list(rng.choice(nodes, size=k_actual, replace=False))
