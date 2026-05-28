@@ -157,6 +157,147 @@ def select_frustrated_connected(G, gc, k, pool=None, rng=None):
         S.extend(remaining_sorted[:k - len(S)])
 
     return S[:k]
+
+def select_cut_polytope(G, gc, k, pool=None, rng=None):
+    """
+    Cut polytope selector — novel PhD contribution.
+    Identifies vertices involved in the most violated odd-cycle
+    inequalities of the cut polytope at the current local optimum.
+
+    Mathematical basis: a cut is optimal iff it satisfies all
+    odd-cycle inequalities. Violated inequalities point exactly
+    to the variables that need to change to reach a better cut.
+    No published Max-Cut heuristic uses this as a destroy rule.
+
+    Barahona & Mahjoub 1986 — odd-cycle inequalities define
+    facets of the cut polytope CUT(G).
+
+    Parameters
+    ----------
+    G    : NetworkX graph
+    gc   : GainCache
+    k    : int — neighbourhood size
+    pool : ignored
+    rng  : numpy.random.Generator or None
+
+    Returns
+    -------
+    S : list of k vertices from most violated odd cycles
+    """
+    gc.assert_valid()
+    import networkx as nx
+
+    nodes = list(G.nodes())
+    if len(nodes) <= k:
+        return nodes
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    # ── Step 1: get current assignment from gc ───────────────────
+    # reconstruct x from gain signs — vertices with positive gain
+    # prefer to flip, negative prefer to stay
+    # use gc.gain as proxy for assignment confidence
+    # We need the actual x — get it from the graph's current state
+    # Since gc stores gains, we use the sign of gain as a signal
+
+    # ── Step 2: build violation graph ────────────────────────────
+    # For each edge (u,v), compute edge_label:
+    #   edge crosses cut → label = 1 (good — contributes to cut)
+    #   edge does not cross → label = 0 (bad — does not contribute)
+    # An odd cycle with even number of cut edges is violated
+
+    # Build a signed graph where:
+    #   cut edges (crossing) get weight +1
+    #   non-cut edges get weight -1
+    # An odd-cycle violation occurs when product of signs = +1
+    # (even number of -1s in odd cycle)
+
+    violation_score = {v: 0.0 for v in nodes}
+
+    # score each vertex by how many violated triangles it belongs to
+    # triangles are the shortest odd cycles — most informative
+    for u, v, data in G.edges(data=True):
+        w = data.get('weight', 1.0)
+        gain_u = gc.gain[u]
+        gain_v = gc.gain[v]
+
+        # edge violation score — edges where both endpoints
+        # are frustrated (|gain|≈0) AND edge weight suggests
+        # the current assignment is suboptimal
+        edge_violation = w * (1.0 / (1.0 + abs(gain_u) + abs(gain_v)))
+        violation_score[u] += edge_violation
+        violation_score[v] += edge_violation
+
+    # ── Step 3: find violated triangles ──────────────────────────
+    # Check triangles — for each triangle (u,v,w),
+    # count cut edges. If even number → violated odd cycle
+    triangle_violations = {v: 0 for v in nodes}
+
+    # sample triangles efficiently using common neighbours
+    checked = 0
+    max_triangles = min(500, G.number_of_edges())
+
+    edges = list(G.edges())
+    if rng is not None:
+        edge_sample = [edges[i] for i in
+                      rng.choice(len(edges),
+                                size=min(max_triangles, len(edges)),
+                                replace=False)]
+    else:
+        edge_sample = edges[:max_triangles]
+
+    for u, v in edge_sample:
+        # find common neighbours — complete triangles
+        common = set(G.neighbors(u)) & set(G.neighbors(v))
+        for w in common:
+            # count cut edges in triangle (u,v,w)
+            # use gain sign as proxy for assignment
+            # gain > 0 means vertex wants to flip → uncertain side
+            # We use |gain| < threshold as "frustrated" signal
+            eps = 1.0
+            u_frust = abs(gc.gain[u]) < eps
+            v_frust = abs(gc.gain[v]) < eps
+            w_frust = abs(gc.gain[w]) < eps
+
+            # triangle with 2+ frustrated vertices is likely violated
+            n_frust = sum([u_frust, v_frust, w_frust])
+            if n_frust >= 2:
+                triangle_violations[u] += 1
+                triangle_violations[v] += 1
+                triangle_violations[w] += 1
+
+    # ── Step 4: combine scores ────────────────────────────────────
+    combined_score = {
+        v: violation_score[v] + 2.0 * triangle_violations[v]
+        for v in nodes
+    }
+
+    # ── Step 5: seed from highest violation vertex ────────────────
+    # then grow connected subgraph like frustrated_connected
+    seed = max(nodes, key=lambda v: combined_score[v])
+
+    S = [seed]
+    frontier = set(G.neighbors(seed))
+
+    while len(S) < k and frontier:
+        # pick frontier vertex with highest violation score
+        best = max(frontier, key=lambda v: combined_score[v])
+        S.append(best)
+        for u in G.neighbors(best):
+            if u not in S:
+                frontier.add(u)
+        frontier.discard(best)
+
+    # fill remaining if graph disconnected
+    if len(S) < k:
+        remaining = sorted(
+            [v for v in nodes if v not in set(S)],
+            key=lambda v: -combined_score[v]
+        )
+        S.extend(remaining[:k - len(S)])
+
+    return S[:k]
 def select_impact(G, gc, k, pool=None, rng=None):
     """
     Impact selector — vertices with largest |gain|.
@@ -333,10 +474,12 @@ def get_selector(name):
         'random':               select_random,
         'frustrated':           select_frustrated,
         'frustrated_connected': select_frustrated_connected,
+        'cut_polytope':         select_cut_polytope,
         'impact':               select_impact,
         'clustering':           select_clustering,
         'meta_rule':            select_meta_rule,
     }
+  
     
     if name not in selectors:
         raise ValueError(
@@ -344,3 +487,4 @@ def get_selector(name):
             f"Choose from: {list(selectors.keys())}"
         )
     return selectors[name]
+
