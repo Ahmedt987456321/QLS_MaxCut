@@ -2,12 +2,13 @@
 Experiment runner — compares all methods across multiple trials.
 Produces the results needed for the thesis evaluation.
 """
-
+import numpy as np
 import time
 import json
 import numpy as np
 from pathlib import Path
 from scipy import stats
+
 
 from src.graph import (load_gset, generate_random_regular,
                        generate_erdos_renyi, generate_sbm, graph_stats)
@@ -15,13 +16,14 @@ from src.gain_cache import GainCache
 from src.local_search import one_flip_ls, compute_cut_value, random_cut
 from src.qls import qls
 from src.adaptive_qls import adaptive_qls
-from src.baselines import simulated_annealing, tabu_search
+from src.baselines import simulated_annealing, tabu_search, breakout_local_search
 from src.backends import backend_exact, backend_neal, get_backend
 from src.selectors import (select_random, select_frustrated,
                             select_frustrated_connected,
                             select_impact, select_meta_rule, get_selector)
 
 from src.metrics import Metrics
+
 
 
 def run_single_trial(method_fn, method_kwargs, seed):
@@ -377,6 +379,12 @@ def run_gset_experiment(instance_name, budget=30, n_trials=10):
                 'n_reads': 200, 'best_known': best_known,
                 'acceptance': 'lookahead'
             }
+        },
+        {
+            'name': 'BLS',
+            'fn': breakout_local_search,
+            'kwargs': {'G': G, 'budget_seconds': budget,
+                      'best_known': best_known}
         },
     ]
     
