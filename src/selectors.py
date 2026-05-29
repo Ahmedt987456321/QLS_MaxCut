@@ -351,6 +351,138 @@ def select_adaptive_spectral(G, gc, k, pool=None, rng=None, x=None):
         # dense graph — connected frustrated is better
         return select_frustrated_connected(G, gc, k, pool=pool, rng=rng, x=x)
 
+def select_smart_adaptive(G, gc, k, pool=None, rng=None, x=None):
+    """
+    Smart adaptive selector — novel PhD contribution.
+    Three-tier routing combining static graph structure analysis
+    with dynamic runtime escape rate monitoring.
+
+    Tier 1 (static): bipartiteness check
+        bipartite → Fiedler (provably exact, Desai-Rao theorem)
+    Tier 2 (static): algebraic connectivity
+        non-bipartite, lambda2 < 2.0 → Fiedler with plain Laplacian
+    Tier 3 (static): dense graphs
+        lambda2 >= 2.0 → connected frustrated
+
+    Dynamic override: monitors escape rate EMA over last 10 calls.
+        If escape rate drops below 0.1 → switch to other selector.
+        If escape rate recovers → switch back.
+
+    This makes the selector genuinely adaptive to the search state
+    not just the graph structure.
+
+    Parameters
+    ----------
+    G    : NetworkX graph
+    gc   : GainCache
+    k    : int
+    pool : ignored
+    rng  : numpy.random.Generator or None
+    x    : dict — current vertex assignments
+
+    Returns
+    -------
+    S : list of k vertices
+    """
+    gc.assert_valid()
+    import networkx as nx
+    import numpy as np
+
+    # ── initialise state caches ───────────────────────────────────
+    graph_id = id(G)
+
+    if not hasattr(select_smart_adaptive, '_state'):
+        select_smart_adaptive._state = {}
+
+    if graph_id not in select_smart_adaptive._state:
+        # compute static graph features once
+        import scipy.sparse as sp
+        import scipy.sparse.linalg as spla
+
+        nodes = list(G.nodes())
+        n = len(nodes)
+        node_idx = {v: i for i, v in enumerate(nodes)}
+
+        # bipartiteness check O(n+m)
+        is_bip = nx.is_bipartite(G)
+
+        # algebraic connectivity
+        rows, cols, vals = [], [], []
+        for u, v, data in G.edges(data=True):
+            w = abs(data.get('weight', 1.0))
+            i, j = node_idx[u], node_idx[v]
+            rows.extend([i, j, i, j])
+            cols.extend([i, j, j, i])
+            vals.extend([w, w, -w, -w])
+        L = sp.csr_matrix((vals, (rows, cols)), shape=(n, n))
+        try:
+            eigenvalues, _ = spla.eigsh(L, k=2, which='SM',
+                                        tol=1e-3, maxiter=1000)
+            lambda2 = sorted(eigenvalues)[1]
+        except Exception:
+            lambda2 = 1.0
+
+        # determine static selector
+        if is_bip:
+            static_selector = 'fiedler'
+        elif lambda2 < 2.0:
+            static_selector = 'fiedler_plain'
+        else:
+            static_selector = 'fconn'
+
+        select_smart_adaptive._state[graph_id] = {
+            'is_bip': is_bip,
+            'lambda2': lambda2,
+            'static_selector': static_selector,
+            'current_selector': static_selector,
+            'escape_ema': 0.5,      # EMA of escape success
+            'call_count': 0,
+            'last_cut': None,
+        }
+
+    state = select_smart_adaptive._state[graph_id]
+    state['call_count'] += 1
+
+    # ── dynamic escape rate monitoring ────────────────────────────
+    # update escape EMA based on whether cut improved since last call
+    if x is not None and state['last_cut'] is not None:
+        from src.local_search import compute_cut_value
+        current_cut = compute_cut_value(G, x)
+        improved = 1.0 if current_cut > state['last_cut'] else 0.0
+        # EMA with alpha=0.3
+        state['escape_ema'] = 0.3 * improved + 0.7 * state['escape_ema']
+
+        # dynamic switching: if escape rate low, try other selector
+        if state['call_count'] > 5:  # warmup period
+            if state['escape_ema'] < 0.1:
+                # current selector not working — switch
+                if state['current_selector'] in ('fiedler', 'fiedler_plain'):
+                    state['current_selector'] = 'fconn'
+                else:
+                    # switch back to static default
+                    state['current_selector'] = state['static_selector']
+                state['escape_ema'] = 0.5  # reset after switch
+            elif state['escape_ema'] > 0.4:
+                # current selector working well — allow return to static
+                state['current_selector'] = state['static_selector']
+
+    # update last cut
+    if x is not None:
+        from src.local_search import compute_cut_value
+        state['last_cut'] = compute_cut_value(G, x)
+
+    # ── call appropriate selector ─────────────────────────────────
+    sel = state['current_selector']
+
+    if sel == 'fiedler':
+        return select_fiedler(G, gc, k, pool=pool, rng=rng, x=x)
+    elif sel == 'fiedler_plain':
+        # Fiedler with plain unsigned Laplacian for near-bipartite graphs
+        # temporarily set x=None to force plain Laplacian in select_fiedler
+        return select_fiedler(G, gc, k, pool=pool, rng=rng, x=None)
+    else:
+        return select_frustrated_connected(G, gc, k, pool=pool, rng=rng, x=x)
+
 def select_cut_polytope(G, gc, k, pool=None, rng=None, x=None):
     """
     Cut polytope selector — novel PhD contribution.
@@ -850,6 +982,7 @@ def get_selector(name):
         'hybrid_topo':          select_hybrid_topo,
         'fiedler':              select_fiedler,
         'adaptive_spectral':    select_adaptive_spectral,
+        'smart_adaptive':       select_smart_adaptive,
     }
   
     
