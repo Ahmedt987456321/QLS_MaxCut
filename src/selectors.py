@@ -159,6 +159,198 @@ def select_frustrated_connected(G, gc, k, pool=None, rng=None, x=None):
         S.extend(remaining_sorted[:k - len(S)])
 
     return S[:k]
+
+def select_fiedler(G, gc, k, pool=None, rng=None, x=None):
+    """
+    Fiedler-augmented selector — novel PhD contribution.
+    Combines Fiedler vector with gain-based selection.
+
+    Mathematical basis: Trevisan 2009 (Max Cut and Smallest Eigenvalue)
+    proves vertices near the zero-crossing of the Fiedler vector are
+    the most uncertain for Max-Cut — exactly the same intuition as the
+    frustrated selector but grounded in spectral graph theory.
+
+    Combined score: alpha * entropy(gain) + (1-alpha) * fiedler_proximity
+    This selects vertices that are BOTH informationally uncertain (low
+    |gain|) AND spectrally uncertain (near Fiedler zero-crossing).
+
+    Uses frustration-weighted Laplacian: cut edges get weight +1,
+    non-cut edges get weight -1. The Fiedler vector of this modified
+    graph directly points at the most violated bipartite community.
+
+    Parameters
+    ----------
+    G     : NetworkX graph
+    gc    : GainCache
+    k     : int — neighbourhood size
+    pool  : ignored
+    rng   : numpy.random.Generator or None
+    x     : dict — current vertex assignments (used for weighted Laplacian)
+
+    Returns
+    -------
+    S : list of k vertices — spectrally and informationally uncertain
+    """
+    gc.assert_valid()
+    import numpy as np
+    import scipy.sparse as sp
+    import scipy.sparse.linalg as spla
+
+    nodes = list(G.nodes())
+    n = len(nodes)
+
+    if n <= k:
+        return nodes
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    node_idx = {v: i for i, v in enumerate(nodes)}
+
+    # ── build frustration-weighted Laplacian ──────────────────────
+    # cut edges (x[u] != x[v]) get weight +1
+    # non-cut edges (x[u] == x[v]) get weight -1
+    # If x is not available, fall back to plain Laplacian
+    rows, cols, vals = [], [], []
+
+    for u, v, data in G.edges(data=True):
+        w = data.get('weight', 1.0)
+        i, j = node_idx[u], node_idx[v]
+
+        if x is not None:
+            # frustration-weighted: cut=+1, non-cut=-1
+            edge_sign = 1.0 if x[u] != x[v] else -1.0
+            ew = abs(w) * edge_sign
+        else:
+            ew = abs(w)
+
+        # Laplacian: L[i,i] += |ew|, L[i,j] -= ew
+        rows.extend([i, j, i, j])
+        cols.extend([i, j, j, i])
+        vals.extend([abs(ew), abs(ew), -ew, -ew])
+
+    L = sp.csr_matrix((vals, (rows, cols)), shape=(n, n))
+
+    # ── compute Fiedler vector ────────────────────────────────────
+    try:
+        # get second smallest eigenvalue and vector
+        eigenvalues, eigenvectors = spla.eigsh(
+            L, k=2, which='SM', tol=1e-3, maxiter=1000)
+        # second eigenvector is Fiedler vector
+        fiedler = eigenvectors[:, 1]
+    except Exception:
+        # fallback to frustrated_connected if eigensolver fails
+        return select_frustrated_connected(G, gc, k, pool=pool, rng=rng, x=x)
+
+    # ── compute combined score ────────────────────────────────────
+    # alpha=0.6: 60% gain entropy, 40% Fiedler proximity to zero
+    alpha = 0.6
+    eps = 0.005
+
+    scores = {}
+    for v in nodes:
+        i = node_idx[v]
+        # gain entropy: high score when |gain| is low (uncertain)
+        gain_score = 1.0 / (1.0 + abs(gc.gain[v]))
+        # fiedler score: high score when near zero-crossing (boundary)
+        fiedler_score = 1.0 / (eps + abs(fiedler[i]))
+        scores[v] = alpha * gain_score + (1 - alpha) * fiedler_score
+
+    # ── grow connected subgraph from highest-score seed ───────────
+    seed = max(nodes, key=lambda v: scores[v])
+
+    S = [seed]
+    frontier = set(G.neighbors(seed))
+
+    while len(S) < k and frontier:
+        best = max(frontier, key=lambda v: scores[v])
+        S.append(best)
+        for u in G.neighbors(best):
+            if u not in S:
+                frontier.add(u)
+        frontier.discard(best)
+
+    # fill if disconnected
+    if len(S) < k:
+        remaining = sorted(
+            [v for v in nodes if v not in set(S)],
+            key=lambda v: -scores[v]
+        )
+        S.extend(remaining[:k - len(S)])
+
+    return S[:k]
+
+def select_adaptive_spectral(G, gc, k, pool=None, rng=None, x=None):
+    """
+    Adaptive spectral selector — novel PhD contribution.
+    Routes between Fiedler and connected frustrated based on
+    graph's algebraic connectivity (lambda_2).
+
+    Theory: Fiedler vector is most informative when lambda_2 is small
+    (sparse graphs with clear community structure like G11).
+    Connected frustrated is better on dense graphs (large lambda_2)
+    where spectral signal is diffuse.
+
+    Threshold: lambda_2 < 1.0 -> use Fiedler
+               lambda_2 >= 1.0 -> use connected frustrated
+
+    Parameters
+    ----------
+    G    : NetworkX graph
+    gc   : GainCache
+    k    : int
+    pool : ignored
+    rng  : numpy.random.Generator or None
+    x    : dict — current vertex assignments
+
+    Returns
+    -------
+    S : list of k vertices
+    """
+    gc.assert_valid()
+    import scipy.sparse as sp
+    import scipy.sparse.linalg as spla
+    import numpy as np
+
+    # cache lambda_2 per graph to avoid recomputing every call
+    graph_id = id(G)
+    if not hasattr(select_adaptive_spectral, '_lambda2_cache'):
+        select_adaptive_spectral._lambda2_cache = {}
+
+    if graph_id not in select_adaptive_spectral._lambda2_cache:
+        # compute algebraic connectivity
+        nodes = list(G.nodes())
+        n = len(nodes)
+        node_idx = {v: i for i, v in enumerate(nodes)}
+
+        rows, cols, vals = [], [], []
+        for u, v, data in G.edges(data=True):
+            w = abs(data.get('weight', 1.0))
+            i, j = node_idx[u], node_idx[v]
+            rows.extend([i, j, i, j])
+            cols.extend([i, j, j, i])
+            vals.extend([w, w, -w, -w])
+
+        L = sp.csr_matrix((vals, (rows, cols)), shape=(n, n))
+        try:
+            eigenvalues, _ = spla.eigsh(L, k=2, which='SM',
+                                        tol=1e-3, maxiter=1000)
+            lambda2 = sorted(eigenvalues)[1]
+        except Exception:
+            lambda2 = 1.0  # fallback
+
+        select_adaptive_spectral._lambda2_cache[graph_id] = lambda2
+
+    lambda2 = select_adaptive_spectral._lambda2_cache[graph_id]
+
+    # route based on algebraic connectivity
+    if lambda2 < 1.0:
+        # sparse graph — Fiedler is informative
+        return select_fiedler(G, gc, k, pool=pool, rng=rng, x=x)
+    else:
+        # dense graph — connected frustrated is better
+        return select_frustrated_connected(G, gc, k, pool=pool, rng=rng, x=x)
+
 def select_cut_polytope(G, gc, k, pool=None, rng=None, x=None):
     """
     Cut polytope selector — novel PhD contribution.
@@ -655,7 +847,9 @@ def get_selector(name):
         'clustering':           select_clustering,
         'meta_rule':            select_meta_rule,
         'topological':          select_topological,
-        'hybrid_topo': select_hybrid_topo,
+        'hybrid_topo':          select_hybrid_topo,
+        'fiedler':              select_fiedler,
+        'adaptive_spectral':    select_adaptive_spectral,
     }
   
     
