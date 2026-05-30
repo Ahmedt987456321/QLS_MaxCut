@@ -1,0 +1,65 @@
+{
+  "G11": {
+    "fiedler_cut": 796.0,
+    "fiedler_ratio": 1.4113475177304964,
+    "measured_ratio": 1.0,
+    "exact_hits": 10,
+    "trials": 10
+  },
+  "G12": {
+    "fiedler_cut": 790.0,
+    "fiedler_ratio": 1.420863309352518,
+    "measured_ratio": 1.0,
+    "exact_hits": 10,
+    "trials": 10
+  },
+  "G13": {
+    "fiedler_cut": 790.0,
+    "fiedler_ratio": 1.3573883161512028,
+    "measured_ratio": 0.9965635738831615,
+    "exact_hits": 0,
+    "trials": 10
+  },
+  "G32": {
+    "fiedler_cut": 2010.0,
+    "fiedler_ratio": 1.425531914893617,
+    "measured_ratio": 1.0,
+    "exact_hits": 6,
+    "trials": 10
+  },
+  "G33": {
+    "fiedler_cut": 2032.0,
+    "fiedler_ratio": 1.4703328509406657,
+    "measured_ratio": 0.9927641099855282,
+    "exact_hits": 0,
+    "trials": 10
+  },
+  "G34": {
+    "fiedler_cut": 1994.0,
+    "fiedler_ratio": 1.4407514450867052,
+    "measured_ratio": 0.9985549132947977,
+    "exact_hits": 0,
+    "trials": 10
+  },
+  "G48": {
+    "fiedler_cut": 0,
+    "fiedler_ratio": 0.0,
+    "measured_ratio": 1.0,
+    "exact_hits": 8,
+    "trials": 10
+  },
+  "G49": {
+    "fiedler_cut": 60.0,
+    "fiedler_ratio": 0.01,
+    "measured_ratio": 1.0,
+    "exact_hits": 3,
+    "trials": 10
+  },
+  "G50": {
+    "fiedler_cut": 50.0,
+    "fiedler_ratio": 0.008503401360544218,
+    "measured_ratio": 0.9931972789115646,
+    "exact_hits": 0,
+    "trials": 10
+  }
+}
