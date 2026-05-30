@@ -1,0 +1,83 @@
+{
+  "G11": {
+    "best_cut": 564.0,
+    "best_known": 564,
+    "ratio": 1.0,
+    "exact_hits": 10,
+    "trials": 10,
+    "median_cut": 564.0,
+    "distinct_optimal_partitions": 10
+  },
+  "G12": {
+    "best_cut": 556.0,
+    "best_known": 556,
+    "ratio": 1.0,
+    "exact_hits": 10,
+    "trials": 10,
+    "median_cut": 556.0,
+    "distinct_optimal_partitions": 10
+  },
+  "G13": {
+    "best_cut": 580.0,
+    "best_known": 582,
+    "ratio": 0.9965635738831615,
+    "exact_hits": 0,
+    "trials": 10,
+    "median_cut": 580.0,
+    "distinct_optimal_partitions": 6
+  },
+  "G32": {
+    "best_cut": 1410.0,
+    "best_known": 1410,
+    "ratio": 1.0,
+    "exact_hits": 6,
+    "trials": 10,
+    "median_cut": 1410.0,
+    "distinct_optimal_partitions": 6
+  },
+  "G33": {
+    "best_cut": 1372.0,
+    "best_known": 1382,
+    "ratio": 0.9927641099855282,
+    "exact_hits": 0,
+    "trials": 10,
+    "median_cut": 1366.0,
+    "distinct_optimal_partitions": 1
+  },
+  "G34": {
+    "best_cut": 1382.0,
+    "best_known": 1384,
+    "ratio": 0.9985549132947977,
+    "exact_hits": 0,
+    "trials": 10,
+    "median_cut": 1380.0,
+    "distinct_optimal_partitions": 2
+  },
+  "G48": {
+    "best_cut": 6000.0,
+    "best_known": 6000,
+    "ratio": 1.0,
+    "exact_hits": 8,
+    "trials": 10,
+    "median_cut": 6000.0,
+    "distinct_optimal_partitions": 1
+  },
+  "G49": {
+    "best_cut": 6000.0,
+    "best_known": 6000,
+    "ratio": 1.0,
+    "exact_hits": 3,
+    "trials": 10,
+    "median_cut": 5936.0,
+    "distinct_optimal_partitions": 1
+  },
+  "G50": {
+    "best_cut": 5840.0,
+    "best_known": 5880,
+    "ratio": 0.9931972789115646,
+    "exact_hits": 0,
+    "trials": 10,
+    "median_cut": 5783.0,
+    "distinct_optimal_partitions": 1
+  }
+}
