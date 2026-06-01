@@ -82,7 +82,8 @@ def run_experiment(G, methods, n_trials=30, best_known=None,
             best_cut = metrics.best_cut
             escape_rate = metrics.escape_rate()
             approx_ratio = (best_cut / best_known
-                           if best_known else None)
+                           if best_known is not None else None)
+           
 
             trial_results['best_cut'].append(best_cut)
             trial_results['escape_rate'].append(escape_rate)
@@ -91,7 +92,8 @@ def run_experiment(G, methods, n_trials=30, best_known=None,
             trial_results['time_to_target'].append(
                 metrics.time_to_target or float('nan')
             )
-            if approx_ratio:
+            
+            if approx_ratio is not None:
                 trial_results['approx_ratio'].append(approx_ratio)
 
             if (trial + 1) % 5 == 0:
@@ -149,8 +151,8 @@ def _print_statistical_comparison(results):
             try:
                 stat, p = stats.wilcoxon(a, b)
                 sig = "**significant**" if p < 0.05 else "not significant"
-                print(f"  {names[i]} vs {names[j]}: "
-                      f"p={p:.4f} ({sig})")
+                p_str = "p < 0.0001" if p < 1e-4 else f"p = {p:.4f}"
+                print(f"  {names[i]} vs {names[j]}: {p_str} ({sig})")
             except Exception as e:
                 print(f"  {names[i]} vs {names[j]}: "
                       f"test failed ({e})")

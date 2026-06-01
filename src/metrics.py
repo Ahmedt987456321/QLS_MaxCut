@@ -24,7 +24,7 @@ class Metrics:
 
         # outcome metrics
         self.cut_trace = []          # cut value after every iteration
-        self.best_cut = 0.0          # best cut seen so far
+        self.best_cut = float('-inf')  # F31: sentinel; a real cut overwrites it
         self.time_to_target = None   # wall time to reach target_ratio
 
         # process metrics
@@ -86,8 +86,11 @@ class Metrics:
 
     def summary(self, best_known=None):
         """Print a summary of the run."""
+        if not self.cut_trace:
+            print("Best cut        : (no cuts recorded)")
+            return
         print(f"Best cut        : {self.best_cut:.1f}")
-        if best_known:
+        if best_known is not None:
             ratio = self.best_cut / best_known
             print(f"Approx ratio    : {ratio:.4f}")
         print(f"QLS calls       : {self.qls_calls}")
