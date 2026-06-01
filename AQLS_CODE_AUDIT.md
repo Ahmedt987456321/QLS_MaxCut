@@ -1,4 +1,5 @@
 # AQLS Code Audit — Consolidated Reference
+2026-06-01 progress: File #1 verified (invariant tests green). File #2 qubo + backend_exact F5 fixed, proven by QUBO=cut test. selectors.py: F9 fixed+verified, F52 selector tests added, F25 fallback made visible. adaptive_qls.py: F25 fallback visible, F22 resolved (deliberate fixed-k). All committed to phd-extensions.
 
 **Scope:** Full read of the AQLS/QLS Max-Cut codebase — `gain_cache.py`, `local_search.py`, `qubo.py`, `selectors.py`, `backends.py`, `adaptive_qls.py`, `qls.py`, `baselines.py`, `graph.py`, `experiment.py`, `metrics.py`, plus `tests/test_qubo.py` and `tests/test_local_search.py`.
 
@@ -97,6 +98,12 @@ Thesis narrates "smallest eigenvector of signless Laplacian Q=D+A *is* the optim
 `is_signed_graph_balanced` uses `σ = sign(w)`. For Max-Cut the relevant signature is the negated (anti-ferromagnetic) one. Under the code's convention, all-`+1` graphs (G14/G22/G1) are trivially balanced → tier-1 rule routes them to **Fiedler** — the opposite of the empirical truth. Likely masked in runs only because `which='SM'` fails → `nan` → falls through (i.e. "correct" routing by accident, not design).
 *Fix:* use bipartiteness under the all-negative signature, i.e. `nx.is_bipartite(G)` for the unsigned graph (the originally commented-out line). Confirm against F44.
 
+######### updated F9 is below ##################
+**F9 — Balance routing CONFIRMED ANTI-CORRELATED — RESOLVED (2026-06-01).**
+Diagnostic (check_signs.py + check_balance.py): G11/G12/G13 are genuinely signed (±1, real negative edges); G14/G22/G1 are all-+1. The old is_signed_graph_balanced was anti-correlated — it said False for the bipartite ±1 graphs where Fiedler WINS (G11/G12) and True for the +1 graphs where Fiedler is HARMFUL (G14/G22/G1). nx.is_bipartite gives the correct split (True/True/False/False/False/False).
+FIX APPLIED + committed: select_smart_adaptive now routes by nx.is_bipartite (bipartite -> Fiedler, else -> FConn). Verified on all six (check_route.py): G11/G12 -> fiedler, G13/G14/G22/G1 -> fconn.
+Re-run flag: any result via the smart_adaptive / adaptive_spectral ROUTER used the inverted predictor and needs re-checking. Pure select_fiedler results (564 on G11) are unaffected. Locked MSc FConn-LA results are unaffected (never used the router).
+
 **F25 — Silent selector fallback can make a labelled run a blend. (HIGH.)**
 Two layers of `except → fallback`: Phase 4 in `adaptive_qls` (`except → random`) and inside `select_fiedler` (`except → frustrated_connected`). An "AQLS-Fiedler" run could silently contain random + FConn selections with no record.
 *Fix:* add a fallback counter/log to both paths; during validation runs, raise instead of swallow. Re-run one G11 Fiedler trial and confirm fallback count = 0 before claiming "Fiedler achieves 564."
@@ -126,6 +133,13 @@ The "p<0.0001, never 0.0000" rule is currently a manual post-hoc correction, not
 - **F13 — Redundant EMA + double work in `smart_adaptive`.** Its own α=0.3 escape-EMA duplicates the loop EMA and computes `compute_cut_value` twice per call. Pick one EMA as source of truth.
 - **F14 — `id(G)` cache key unsafe.** CPython can reuse freed addresses. Use a stable key (instance name or `(n,m,hash(sorted edges))`).
 - **F22 — Adaptive-k trend sign suspect.** "improvement trend → shrink k" reads as a non-sequitur; mixing improving/worsening deltas on one scale is ambiguous. **First confirm whether finals used fixed `k_min==k_max`** (Part 4 #4) — if so this controller is dormant in the headline runs and only needs a docstring/claim correction.
+
+#############updated F22 is below #########
+
+**F22 — Adaptive-k controller: RESOLVED, no fix needed (deliberate design).**
+Confirmed from Implementation-chat history: final 30-trial runs used FIXED k per instance (k_min==k_max: G1=160, G11=400, G14=400, G22=640), chosen from a k-sweep. This was deliberate — fixing k is what made the spectral law (optimal k proportional to 1/lambda2, R^2=0.94) measurable; an active controller would have masked that effect. The controller's suspect trend-sign logic never fired in any reported result.
+Action: no code change. Thesis framing: "We swept k, found optimal k proportional to 1/lambda2 (structural finding); finals use the empirically-optimal fixed k per instance; adaptive self-tuning of k is future work." Fixed-k is a stated strength, not a missing feature.
+
 - **F23 — Budget straddle / overshoot.** `while time()<budget` gates entry but a long descent can overshoot. Symmetric across AQLS/QLS/SA, but confirm per-trial elapsed ≈ budget so "equal wall-clock" holds. (Same issue F49.)
 - **F24 — Fiedler eigenvector recomputed every call.** Confounds Fiedler-vs-FConn *timing*; also runs F8 every call. Cache eigenvector once per graph (Research-chat recommendation, never applied).
 - **F31 — `Metrics.best_cut = 0.0` silent zero.** A never-recorded run yields `best_cut=0.0` flowing in as a real datum. Init to `-inf`; assert `cut_trace` non-empty before trusting `best_cut`.
