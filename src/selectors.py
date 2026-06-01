@@ -286,10 +286,19 @@ def select_fiedler(G, gc, k, pool=None, rng=None, x=None):
             L, k=2, which='SM', tol=1e-3, maxiter=1000)
         # second eigenvector is Fiedler vector
         fiedler = eigenvectors[:, 1]
-    except Exception:
-        # fallback to frustrated_connected if eigensolver fails
+    
+    except Exception as e:
+        # F25: make the fallback VISIBLE, not silent. A silent fallback
+        # would make a "Fiedler" run secretly part-FConn.
+        select_fiedler._fallback_count = getattr(
+            select_fiedler, '_fallback_count', 0) + 1
+        import warnings
+        warnings.warn(
+            f"select_fiedler eigensolver failed ({e}); fell back to FConn "
+            f"(fallback #{select_fiedler._fallback_count})")
         return select_frustrated_connected(G, gc, k, pool=pool, rng=rng, x=x)
-
+   
+   
     # ── compute combined score ────────────────────────────────────
     # alpha=0.6: 60% gain entropy, 40% Fiedler proximity to zero
     alpha = 0.6
