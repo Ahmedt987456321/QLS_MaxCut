@@ -5,8 +5,52 @@ All selectors share the same interface:
 """
 
 import numpy as np
+import networkx as nx
 from src.gain_cache import GainCache
 
+def is_signed_graph_balanced(G, x=None, tol=1e-4):
+    """
+    Test signed-graph balance using the ACTUAL edge-weight signs.
+
+    For ±1-weighted instances (G11/G12/G13), the sign pattern IS the
+    frustration. Balance (frustration index zero) holds iff the signed
+    Laplacian L = D - A_signed has smallest eigenvalue ~0 (Zaslavsky).
+
+    Uses the real edge signs from the graph weights, NOT a uniform
+    all-negative signature — that is what distinguishes balanced G11
+    from frustrated G13.
+
+    Returns (is_balanced, smallest_signed_laplacian_eigenvalue).
+    """
+    import numpy as np
+    import scipy.sparse as sp
+    import scipy.sparse.linalg as spla
+
+    nodes = list(G.nodes())
+    n = len(nodes)
+    idx = {v: i for i, v in enumerate(nodes)}
+
+    rows, cols, vals = [], [], []
+    deg = np.zeros(n)
+    for u, v, data in G.edges(data=True):
+        w = data.get('weight', 1.0)
+        sigma = np.sign(w) if w != 0 else 1.0   # ACTUAL edge sign
+        wabs = abs(w)
+        i, j = idx[u], idx[v]
+        # signed Laplacian L = D - A_signed: off-diagonal = -sigma*|w|
+        rows += [i, j]; cols += [j, i]; vals += [-sigma * wabs, -sigma * wabs]
+        deg[i] += wabs; deg[j] += wabs
+
+    L = sp.diags(deg) + sp.csr_matrix((vals, (rows, cols)), shape=(n, n))
+
+    try:
+        eigvals = spla.eigsh(L, k=2, which='SM', return_eigenvectors=False,
+                             tol=1e-7, maxiter=8000)
+        smallest = float(min(eigvals))
+    except Exception:
+        smallest = float('nan')
+
+    return (abs(smallest) < tol, smallest)
 
 def _plateau_aware_rank(G, gc, mode):
     """
@@ -212,6 +256,7 @@ def select_fiedler(G, gc, k, pool=None, rng=None, x=None):
     # non-cut edges (x[u] == x[v]) get weight -1
     # If x is not available, fall back to plain Laplacian
     rows, cols, vals = [], [], []
+    deg = np.zeros(n)
 
     for u, v, data in G.edges(data=True):
         w = data.get('weight', 1.0)
@@ -224,12 +269,15 @@ def select_fiedler(G, gc, k, pool=None, rng=None, x=None):
         else:
             ew = abs(w)
 
-        # Laplacian: L[i,i] += |ew|, L[i,j] -= ew
-        rows.extend([i, j, i, j])
-        cols.extend([i, j, j, i])
-        vals.extend([abs(ew), abs(ew), -ew, -ew])
+        # Build adjacency part: A[i,j] = -ew, A[j,i] = -ew
+        rows += [i, j]
+        cols += [j, i]
+        vals += [-ew, -ew]
+        deg[i] += abs(ew)
+        deg[j] += abs(ew)
 
-    L = sp.csr_matrix((vals, (rows, cols)), shape=(n, n))
+    # Laplacian = D - A where D is diagonal degree matrix
+    L = sp.diags(deg) + sp.csr_matrix((vals, (rows, cols)), shape=(n, n))
 
     # ── compute Fiedler vector ────────────────────────────────────
     try:
@@ -279,6 +327,8 @@ def select_fiedler(G, gc, k, pool=None, rng=None, x=None):
         S.extend(remaining[:k - len(S)])
 
     return S[:k]
+
+
 
 def select_adaptive_spectral(G, gc, k, pool=None, rng=None, x=None):
     """
@@ -403,8 +453,13 @@ def select_smart_adaptive(G, gc, k, pool=None, rng=None, x=None):
         n = len(nodes)
         node_idx = {v: i for i, v in enumerate(nodes)}
 
-        # bipartiteness check O(n+m)
-        is_bip = nx.is_bipartite(G)
+      
+        # Bipartiteness of the underlying graph predicts Fiedler exact
+        # recovery. Verified empirically (check_balance.py, 2026-06-01):
+        # nx.is_bipartite gives the correct split G11/G12=True, G13=False,
+        # G14/G22/G1=False — whereas is_signed_graph_balanced was
+        # anti-correlated (mislabelled +1 graphs as balanced). See audit F9.
+        is_bipartite = nx.is_bipartite(G)
 
         # algebraic connectivity
         rows, cols, vals = [], [], []
@@ -422,16 +477,19 @@ def select_smart_adaptive(G, gc, k, pool=None, rng=None, x=None):
         except Exception:
             lambda2 = 1.0
 
+
         # determine static selector
-        if is_bip:
+        # bipartite ±1 graphs (G11/G12) → Fiedler (exact recovery)
+        # everything else → FConn (the safe generalist; Fiedler is
+        # harmful on non-bipartite graphs, confirmed on G13/G14/G22/G1)
+        if is_bipartite:
             static_selector = 'fiedler'
-        elif lambda2 < 2.0:
-            static_selector = 'fiedler_plain'
         else:
             static_selector = 'fconn'
 
+        
         select_smart_adaptive._state[graph_id] = {
-            'is_bip': is_bip,
+            'is_bipartite': is_bipartite,
             'lambda2': lambda2,
             'static_selector': static_selector,
             'current_selector': static_selector,
