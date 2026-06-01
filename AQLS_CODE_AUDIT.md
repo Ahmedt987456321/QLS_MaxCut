@@ -226,3 +226,11 @@ F29 — RESOLVED (2026-06-01, check_test_choice.py on G11_k400_final_30trials). 
 
 CODE SIDE OF AUDIT COMPLETE (2026-06-01). All result-affecting findings fixed and verified by tests (F5, F9, F25, F30, F31, F32, A3). Equations proven (gain=delta, QUBO=cut invariant tests green). Remaining items are writing-time only: F7 (Fiedler prose honesty), F8 (only if Fiedler internal scoring is cited). Framing notes to state in thesis: gain-guided SA label (not "standard SA"), deliberate fixed-k (enables the λ₂ law), benchmark-selection rule (one instance per structural family).
 
+G22 PREMISE CORRECTION (2026-06-01). G22 is NOT toroidal/spin-glass — it is a
+RANDOM graph (n=2000, 19,990 edges, avg degree ~20), the n=2000 analogue of G1.
+Per the Bonn BQP library: G22-G42 mirror G1-G21 types at n=2000. The toroidal
+n=2000 instances are G32-G34. Action: anywhere the thesis/notes describe G22 as
+"toroidal" or "spin-glass-like," correct to "random graph." This affects framing
+only — the locked G22 result (SA 13128 vs AQLS 13198.5) is unaffected; it's a
+valid comparison regardless of structural label. G11/G12/G13 remain the genuine
+toroidal ±1 spin-glass instances.

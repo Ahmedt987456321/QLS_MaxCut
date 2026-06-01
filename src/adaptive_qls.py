@@ -100,8 +100,15 @@ def adaptive_qls(G, budget_seconds, selector, backend,
         k_actual = min(k, len(nodes))
         try:
             S = selector(G, gc, k_actual, pool=pool, rng=rng, x=x)
-        except Exception:
-            # fallback to random if selector fails
+        
+        except Exception as e:
+            # F25: make the fallback VISIBLE, not silent.
+            adaptive_qls._fallback_count = getattr(
+                adaptive_qls, '_fallback_count', 0) + 1
+            import warnings
+            warnings.warn(
+                f"selector {getattr(selector,'__name__','?')} failed ({e}); "
+                f"fell back to random (fallback #{adaptive_qls._fallback_count})")
             S = list(rng.choice(nodes, size=k_actual, replace=False))
 
     
