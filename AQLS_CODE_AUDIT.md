@@ -206,3 +206,16 @@ These cannot be settled by static reading; each is a short paste-and-run. Listed
 File #6 baselines.py / qls.py — DONE (2026-06-01): comparators confirmed FAIR and correct. SA is strong (auto-calibrated, gain-guided) — label "gain-guided SA" not "standard SA" (F41). Tabu standard. QLS correct (note full-restart-on-failure vs AQLS pool, F47, only matters for escape-rate comparison). BLS bugs fixed; warm-up counted in budget slightly disadvantages BLS (F40) — works against our favour, so win is not inflated. No code changes needed.
 
 AUDIT FILE PASS COMPLETE: all files audited. Result-affecting bugs fixed (F5, F9, F25), equations proven by invariant tests, p-value reporting enforced (F30), metrics silent-zero closed (F31/F32). Remaining: F8 (parked, only if Fiedler scoring cited), F7 (thesis prose), F29 (test-choice diagnostic), assumption guards A2/A3/A7 (optional hardening).
+
+
+F29 — RESOLVED (2026-06-01, check_test_choice.py on G11_k400_final_30trials).
+SA vs AQLS-FConn-LA-k400, 30 trials each:
+  Wilcoxon (paired):       p = 2.46e-06
+  Mann-Whitney (unpaired): p = 9.71e-10
+Both significant. The conclusion is independent of the paired-vs-unpaired choice. Thesis can state significance under BOTH tests, which forecloses the test-choice objection entirely. No code change; reporting note only.
+
+
+A3 — RESOLVED (2026-06-01). load_gset now records G.graph['weight_type'] (signed/unweighted/weighted) and ['n_negative_edges'], detected from ALL edges. Verified: G11/G13=signed, G14/G1=unweighted. Protects against silently running on a wrong-typed graph.
+F29 — RESOLVED (see entry). Significant under both Wilcoxon (p=2.46e-06) and Mann-Whitney (p=9.71e-10) on G11 30-trial. Conclusion independent of test choice.
+
+CODE SIDE OF AUDIT COMPLETE. All result-affecting findings fixed and verified by tests. Remaining items are writing-time only: F7 (Fiedler prose), F8 (only if Fiedler scoring cited), plus framing notes (gain-guided SA label, deliberate fixed-k, benchmark-selection rule).
