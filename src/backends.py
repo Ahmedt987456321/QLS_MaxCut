@@ -46,7 +46,7 @@ def backend_exact(Q, S, n_reads=None, init=None):
             for j in range(i + 1, n):
                 vj = S[j]
                 xj = x_local[vj]
-                energy += Q.get((vi, vj), 0.0) * xi * xj
+                energy += (Q.get((vi, vj), 0.0) + Q.get((vj, vi), 0.0)) * xi * xj
 
         if energy < best_energy:
             best_energy = energy

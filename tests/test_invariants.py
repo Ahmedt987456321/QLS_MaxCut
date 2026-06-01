@@ -50,7 +50,44 @@ def test_incremental_equals_full_recompute():
             f"stale gain at v={v}: incr={gc.gain[v]} full={fresh.gain[v]}"
         )
 
+
+
+
+def test_qubo_drop_equals_cut_gain():
+    """E7/E8 ≡ E1: solving the local QUBO and applying it must change the
+    real cut by exactly the negative of the QUBO energy change.
+    Uses backend_exact as the oracle, on both +1 and ±1 graphs."""
+    from src.qubo import build_local_qubo, qubo_energy, merge_proposal
+    from src.backends import backend_exact
+    from src.local_search import compute_cut_value, random_cut
+    from src.gain_cache import GainCache
+    from src.selectors import select_frustrated_connected
+
+    for neg_frac in (0.0, 0.5):
+        G = _signed_graph(neg_frac=neg_frac, seed=11)
+        rng = np.random.default_rng(11)
+        for _ in range(20):
+            x = random_cut(G, rng)
+            gc = GainCache(); gc.update(G, x)
+            S = select_frustrated_connected(G, gc, k=12, rng=rng, x=x)
+
+            Q = build_local_qubo(G, x, S)
+            x_local_before = {v: x[v] for v in S}
+            x_local_after = backend_exact(Q, S)
+
+            energy_drop = qubo_energy(Q, x_local_after, S) - qubo_energy(Q, x_local_before, S)
+            x_after = merge_proposal(x, x_local_after, S)
+            cut_gain = compute_cut_value(G, x_after) - compute_cut_value(G, x)
+
+            assert abs(cut_gain - (-energy_drop)) < 1e-9, (
+                f"QUBO drop != cut gain (neg_frac={neg_frac}): "
+                f"cut_gain={cut_gain} -energy_drop={-energy_drop}")
+
+
+
+
 if __name__ == "__main__":
     test_gain_equals_delta_signed_and_unsigned()
     test_incremental_equals_full_recompute()
-    print("Both invariant tests PASSED")
+    test_qubo_drop_equals_cut_gain()
+    print("All invariant tests PASSED")

@@ -82,7 +82,7 @@ def qubo_energy(Q, x_local, S):
         for j in range(i + 1, len(S)):
             vj = S[j]
             xj = x_local.get(vj, 0)
-            energy += Q.get((vi, vj), 0.0) * xi * xj
+            energy += (Q.get((vi, vj), 0.0) + Q.get((vj, vi), 0.0)) * xi * xj
     return energy
 
 
