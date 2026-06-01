@@ -219,3 +219,10 @@ A3 — RESOLVED (2026-06-01). load_gset now records G.graph['weight_type'] (sign
 F29 — RESOLVED (see entry). Significant under both Wilcoxon (p=2.46e-06) and Mann-Whitney (p=9.71e-10) on G11 30-trial. Conclusion independent of test choice.
 
 CODE SIDE OF AUDIT COMPLETE. All result-affecting findings fixed and verified by tests. Remaining items are writing-time only: F7 (Fiedler prose), F8 (only if Fiedler scoring cited), plus framing notes (gain-guided SA label, deliberate fixed-k, benchmark-selection rule).
+
+A3 — RESOLVED (2026-06-01). load_gset now records G.graph['weight_type'] (signed/unweighted/weighted) and ['n_negative_edges'], detected from ALL edges. Verified: G11/G13=signed, G14/G1=unweighted. Protects against silently running on a wrong-typed graph.
+
+F29 — RESOLVED (2026-06-01, check_test_choice.py on G11_k400_final_30trials). SA vs AQLS-FConn-LA-k400, 30 trials: Wilcoxon (paired) p=2.46e-06, Mann-Whitney (unpaired) p=9.71e-10. Both significant. Conclusion is independent of paired-vs-unpaired choice — thesis can state significance under BOTH tests. No code change; reporting note only.
+
+CODE SIDE OF AUDIT COMPLETE (2026-06-01). All result-affecting findings fixed and verified by tests (F5, F9, F25, F30, F31, F32, A3). Equations proven (gain=delta, QUBO=cut invariant tests green). Remaining items are writing-time only: F7 (Fiedler prose honesty), F8 (only if Fiedler internal scoring is cited). Framing notes to state in thesis: gain-guided SA label (not "standard SA"), deliberate fixed-k (enables the λ₂ law), benchmark-selection rule (one instance per structural family).
+
