@@ -202,3 +202,7 @@ These cannot be settled by static reading; each is a short paste-and-run. Listed
 3. **Did a calculation get confused?** Yes — F8 (scale-mismatched blend), F30 (`0.0000`), F29 (test choice), and "2.75×" being printed-not-tested (F50).
 
 **The reassuring synthesis:** everything producing the locked MSc and Fiedler numbers runs through verified math (`backend_neal` + `compute_cut_value`). The work before writing is (i) run the six diagnostics, (ii) clear Tier 1, (iii) reconcile the Fiedler prose with what the code actually does.
+
+File #6 baselines.py / qls.py — DONE (2026-06-01): comparators confirmed FAIR and correct. SA is strong (auto-calibrated, gain-guided) — label "gain-guided SA" not "standard SA" (F41). Tabu standard. QLS correct (note full-restart-on-failure vs AQLS pool, F47, only matters for escape-rate comparison). BLS bugs fixed; warm-up counted in budget slightly disadvantages BLS (F40) — works against our favour, so win is not inflated. No code changes needed.
+
+AUDIT FILE PASS COMPLETE: all files audited. Result-affecting bugs fixed (F5, F9, F25), equations proven by invariant tests, p-value reporting enforced (F30), metrics silent-zero closed (F31/F32). Remaining: F8 (parked, only if Fiedler scoring cited), F7 (thesis prose), F29 (test-choice diagnostic), assumption guards A2/A3/A7 (optional hardening).
