@@ -52,8 +52,21 @@ def load_gset(filepath):
     assert G.number_of_edges() == n_edges, (
         f"Expected {n_edges} edges, got {G.number_of_edges()}"
     )
+    # A3 guard: record the weight type so downstream code can never
+    # silently run on the wrong graph (e.g. a signed instance loaded
+    # as all-+1). Detected from ALL edges, not a sample.
+    weights = [d['weight'] for _, _, d in G.edges(data=True)]
+    n_neg = sum(1 for w in weights if w < 0)
+    if n_neg > 0:
+        G.graph['weight_type'] = 'signed'
+    elif all(w == 1.0 for w in weights):
+        G.graph['weight_type'] = 'unweighted'
+    else:
+        G.graph['weight_type'] = 'weighted'
+    G.graph['n_negative_edges'] = n_neg
 
     return G
+
 
 
 def generate_random_regular(n, d, seed=None):
