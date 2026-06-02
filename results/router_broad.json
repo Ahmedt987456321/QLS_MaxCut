@@ -1,0 +1,90 @@
+{
+  "records": [
+    {
+      "inst": "G11",
+      "lambda2": 0.003946543143456643,
+      "FConn": 548.0,
+      "Fiedler": 564.0,
+      "winner": "Fiedler"
+    },
+    {
+      "inst": "G12",
+      "lambda2": 0.06283367774273631,
+      "FConn": 540.0,
+      "Fiedler": 556.0,
+      "winner": "Fiedler"
+    },
+    {
+      "inst": "G13",
+      "lambda2": 0.03842943919353901,
+      "FConn": 566.0,
+      "Fiedler": 579.0,
+      "winner": "Fiedler"
+    },
+    {
+      "inst": "G32",
+      "lambda2": 0.01577059737104472,
+      "FConn": 1279.0,
+      "Fiedler": 1408.0,
+      "winner": "Fiedler"
+    },
+    {
+      "inst": "G33",
+      "lambda2": 0.024623318809724258,
+      "FConn": 1262.0,
+      "Fiedler": 1357.0,
+      "winner": "Fiedler"
+    },
+    {
+      "inst": "G34",
+      "lambda2": 0.015770597371044675,
+      "FConn": 1304.0,
+      "Fiedler": 1377.0,
+      "winner": "Fiedler"
+    },
+    {
+      "inst": "G14",
+      "lambda2": 2.797431698553374,
+      "FConn": 3034.5,
+      "Fiedler": 2986.5,
+      "winner": "FConn"
+    },
+    {
+      "inst": "G1",
+      "lambda2": 25.30575844568805,
+      "FConn": 11547.5,
+      "Fiedler": 11436.0,
+      "winner": "FConn"
+    },
+    {
+      "inst": "G22",
+      "lambda2": 6.3402296961792155,
+      "FConn": 13229.0,
+      "Fiedler": 12944.5,
+      "winner": "FConn"
+    },
+    {
+      "inst": "reg4_777",
+      "lambda2": 0.5418242920212689,
+      "FConn": 1367.0,
+      "Fiedler": 1292.0,
+      "winner": "FConn"
+    },
+    {
+      "inst": "reg4_888",
+      "lambda2": 0.5674720730175574,
+      "FConn": 1364.0,
+      "Fiedler": 1291.0,
+      "winner": "FConn"
+    }
+  ],
+  "sweep": {
+    "0.05": 10,
+    "0.1": 11,
+    "0.15": 11,
+    "0.2": 11,
+    "0.3": 11,
+    "0.4": 11,
+    "0.5": 11
+  }
+}
