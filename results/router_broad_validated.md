@@ -1,7 +1,6 @@
 # Broadened router validation: 11 instances + threshold sweep (2026-06-01)
 
-Lambda2-routed selector across 11 graphs spanning 4 orders of magnitude in
-lambda2. FConn vs Fiedler, 8 seeds each, winner per instance.
+Lambda2-routed selector across 11 graphs spanning 4 orders of magnitude in lambda2.
 
 | inst      | lambda2 | FConn | Fiedler | winner  |
 |-----------|---------|-------|---------|---------|
@@ -17,25 +16,14 @@ lambda2. FConn vs Fiedler, 8 seeds each, winner per instance.
 | reg4_777  | 0.5418  | 1367  | 1292    | FConn   |
 | reg4_888  | 0.5675  | 1364  | 1291    | FConn   |
 
-## Threshold sweep
-Thresholds routing ALL 11 correctly: 0.1, 0.15, 0.2, 0.3, 0.4, 0.5.
-(0.05 misroutes 1 -- a low-lambda2 instance falls on the wrong side.)
-Empirical SAFE BAND: lambda2 in (0.063, 0.54) -> any threshold here is correct.
+Thresholds routing ALL 11 correctly: 0.1-0.5. Safe band: lambda2 in (0.063, 0.54).
 
-## Finding
-The lambda2 routing rule GENERALIZES: 11 graphs, 4 instance types (toroidal,
-skew-random G14, dense-random, degree-4 expander), zero misroutes across a 5x
-threshold range. Wide safe band (0.063-0.54), not a fragile magic number.
-- G14 (skew, neither toroidal nor expander) passed -> rule holds outside the
-  two clean families.
-- reg4 (degree-4, high lambda2 -> FConn) is the degree-controlled confound
-  breaker baked into the validation: same degree as toroidal Fiedler-winners,
-  opposite lambda2, opposite winner.
+Finding: the routing rule generalizes across 11 graphs / 4 instance types
+(toroidal, skew-random G14, dense-random, degree-4 expander), zero misroutes
+across a 5x threshold range. G14 (neither toroidal nor expander) passed.
+reg4 (degree-4, high lambda2 -> FConn) is the degree-controlled confound breaker.
 
-## Scope of the claim (honest)
-This validates the ROUTER as a working artifact (lambda2 predicts + routes
-the winner, robustly, 11/11). It does NOT establish lambda2 as CAUSAL: on all
-11 graphs lambda2 remains welded to conductance/locality/landscape by theorem
-(Cheeger, Spielman-Teng). "Router works" and "why it works" are separate
-claims; the mechanism (causal lambda2 vs proxy for configuration-space
-frustration) is the open Rank-1 fixed-graph/varied-disorder experiment.
+Scope (honest): validates the ROUTER as a working artifact. Does NOT establish
+lambda2 as CAUSAL -- on all 11, lambda2 stays welded to conductance/locality/
+landscape by theorem. "Router works" vs "why it works" are separate; mechanism
+is the open fixed-graph/varied-disorder experiment.
