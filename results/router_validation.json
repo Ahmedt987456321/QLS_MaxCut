@@ -1,0 +1,38 @@
+[
+  {
+    "inst": "G11",
+    "lambda2": 0.003946543143456643,
+    "routes_to": "Fiedler",
+    "expected": "Fiedler",
+    "router_med": 564.0,
+    "best_hand": 564.0,
+    "match": "YES"
+  },
+  {
+    "inst": "G13",
+    "lambda2": 0.06283367774273774,
+    "routes_to": "Fiedler",
+    "expected": "Fiedler",
+    "router_med": 580.0,
+    "best_hand": 580.0,
+    "match": "YES"
+  },
+  {
+    "inst": "G1",
+    "lambda2": 25.305758445688085,
+    "routes_to": "FConn",
+    "expected": "FConn",
+    "router_med": 11548.5,
+    "best_hand": 11552.5,
+    "match": "YES"
+  },
+  {
+    "inst": "G22",
+    "lambda2": 6.340229696179222,
+    "routes_to": "FConn",
+    "expected": "FConn",
+    "router_med": 13228.0,
+    "best_hand": 13229.5,
+    "match": "YES"
+  }
+]
