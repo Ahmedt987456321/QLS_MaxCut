@@ -1,0 +1,23 @@
+{
+  "reg4_seed101": {
+    "lambda2": 0.5289396992835493,
+    "FConn_med": 1375.0,
+    "Fiedler_med": 1287.0,
+    "winner": "FConn",
+    "p": 0.0009148479102636043
+  },
+  "reg4_seed202": {
+    "lambda2": 0.5664170882788091,
+    "FConn_med": 1356.0,
+    "Fiedler_med": 1290.0,
+    "winner": "FConn",
+    "p": 0.0009148479102636043
+  },
+  "reg4_seed303": {
+    "lambda2": 0.5590501099570355,
+    "FConn_med": 1362.0,
+    "Fiedler_med": 1285.0,
+    "winner": "FConn",
+    "p": 0.0009068567509923489
+  }
+}
