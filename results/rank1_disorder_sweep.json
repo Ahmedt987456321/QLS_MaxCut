@@ -1,0 +1,34 @@
+[
+  {
+    "frac_neg": 0.0,
+    "lambda2": 0.024623318809722898,
+    "FConn": 1600.0,
+    "Fiedler": 1600.0,
+    "winner": "tie",
+    "margin": 0.0
+  },
+  {
+    "frac_neg": 0.1,
+    "lambda2": 0.024623318809724057,
+    "FConn": 1278.0,
+    "Fiedler": 1300.0,
+    "winner": "Fiedler",
+    "margin": 22.0
+  },
+  {
+    "frac_neg": 0.25,
+    "lambda2": 0.02462331880972356,
+    "FConn": 942.0,
+    "Fiedler": 955.0,
+    "winner": "Fiedler",
+    "margin": 13.0
+  },
+  {
+    "frac_neg": 0.5,
+    "lambda2": 0.02462331880972488,
+    "FConn": 525.0,
+    "Fiedler": 534.0,
+    "winner": "Fiedler",
+    "margin": 9.0
+  }
+]
