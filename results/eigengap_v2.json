@@ -1,0 +1,42 @@
+[
+  {
+    "family": "large_gap_2lobe",
+    "connected": true,
+    "lam2": 0.03189992989977089,
+    "lam3": 2.0015640028988364,
+    "gap": 1.9696640729990655,
+    "FConn": 457.0,
+    "Fiedler": 457.0,
+    "winner": "tie"
+  },
+  {
+    "family": "small_gap_4lobe",
+    "connected": true,
+    "lam2": 0.03168634317430535,
+    "lam3": 0.03248392659297886,
+    "gap": 0.0007975834186735101,
+    "FConn": 445.0,
+    "Fiedler": 445.0,
+    "winner": "tie"
+  },
+  {
+    "family": "large_gap_2lobe_b",
+    "connected": true,
+    "lam2": 0.047397630980037506,
+    "lam3": 1.875416831365273,
+    "gap": 1.8280192003852356,
+    "FConn": 457.0,
+    "Fiedler": 457.0,
+    "winner": "tie"
+  },
+  {
+    "family": "small_gap_5lobe",
+    "connected": true,
+    "lam2": 0.02775010115596013,
+    "lam3": 0.02835824520420762,
+    "gap": 0.0006081440482474908,
+    "FConn": 448.0,
+    "Fiedler": 448.0,
+    "winner": "tie"
+  }
+]
