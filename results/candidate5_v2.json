@@ -1,0 +1,142 @@
+[
+  {
+    "density": "low(10%)",
+    "location": "uniform",
+    "band": "n/a",
+    "seed": 10,
+    "lam2": 0.024623318809722898,
+    "FConn": 1270.0,
+    "Fiedler": 1288.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "low(10%)",
+    "location": "uniform",
+    "band": "n/a",
+    "seed": 20,
+    "lam2": 0.024623318809724598,
+    "FConn": 1268.0,
+    "Fiedler": 1280.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "low(10%)",
+    "location": "uniform",
+    "band": "n/a",
+    "seed": 30,
+    "lam2": 0.024623318809724588,
+    "FConn": 1262.0,
+    "Fiedler": 1277.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "low(10%)",
+    "location": "domainwall",
+    "band": "narrow",
+    "wall_start": 0,
+    "lam2": 0.024623318809722135,
+    "FConn": 1414.0,
+    "Fiedler": 1414.0,
+    "winner": "tie"
+  },
+  {
+    "density": "low(10%)",
+    "location": "domainwall",
+    "band": "narrow",
+    "wall_start": 20,
+    "lam2": 0.024623318809724896,
+    "FConn": 1412.0,
+    "Fiedler": 1414.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "low(10%)",
+    "location": "domainwall",
+    "band": "wide",
+    "wall_start": 0,
+    "lam2": 0.024623318809724525,
+    "FConn": 1422.0,
+    "Fiedler": 1422.0,
+    "winner": "tie"
+  },
+  {
+    "density": "low(10%)",
+    "location": "domainwall",
+    "band": "wide",
+    "wall_start": 20,
+    "lam2": 0.0246233188097245,
+    "FConn": 1422.0,
+    "Fiedler": 1422.0,
+    "winner": "tie"
+  },
+  {
+    "density": "high(50%)",
+    "location": "uniform",
+    "band": "n/a",
+    "seed": 10,
+    "lam2": 0.02462331880972304,
+    "FConn": 543.0,
+    "Fiedler": 555.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "high(50%)",
+    "location": "uniform",
+    "band": "n/a",
+    "seed": 20,
+    "lam2": 0.02462331880972485,
+    "FConn": 533.0,
+    "Fiedler": 546.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "high(50%)",
+    "location": "uniform",
+    "band": "n/a",
+    "seed": 30,
+    "lam2": 0.02462331880972361,
+    "FConn": 542.0,
+    "Fiedler": 553.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "high(50%)",
+    "location": "domainwall",
+    "band": "narrow",
+    "wall_start": 0,
+    "lam2": 0.02462331880972393,
+    "FConn": 728.0,
+    "Fiedler": 746.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "high(50%)",
+    "location": "domainwall",
+    "band": "narrow",
+    "wall_start": 20,
+    "lam2": 0.024623318809724272,
+    "FConn": 745.0,
+    "Fiedler": 747.0,
+    "winner": "Fiedler"
+  },
+  {
+    "density": "high(50%)",
+    "location": "domainwall",
+    "band": "wide",
+    "wall_start": 0,
+    "lam2": 0.024623318809723894,
+    "FConn": 754.0,
+    "Fiedler": 742.0,
+    "winner": "FConn"
+  },
+  {
+    "density": "high(50%)",
+    "location": "domainwall",
+    "band": "wide",
+    "wall_start": 20,
+    "lam2": 0.024623318809724837,
+    "FConn": 736.0,
+    "Fiedler": 745.0,
+    "winner": "Fiedler"
+  }
+]
