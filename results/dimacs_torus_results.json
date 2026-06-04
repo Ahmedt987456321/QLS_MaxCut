@@ -1,0 +1,46 @@
+[
+  {
+    "name": "torusg3-8",
+    "n": 512,
+    "fc": 40898695.0,
+    "fi": 40580146.0,
+    "winner": "FConn",
+    "p": 0.025748080821108063,
+    "pred": "FConn",
+    "correct": true,
+    "beta_e": 0.151
+  },
+  {
+    "name": "toruspm3-8-50",
+    "n": 512,
+    "fc": 454.0,
+    "fi": 454.0,
+    "winner": "tie",
+    "p": 0.8027285231465864,
+    "pred": "FConn",
+    "correct": false,
+    "beta_e": 0.151
+  },
+  {
+    "name": "torusg3-15",
+    "n": 3375,
+    "fc": 258233998.0,
+    "fi": 249893249.5,
+    "winner": "FConn",
+    "p": 0.00018267179110955002,
+    "pred": "Fiedler",
+    "correct": false,
+    "beta_e": 0.075
+  },
+  {
+    "name": "toruspm3-15-50",
+    "n": 3375,
+    "fc": 2823.0,
+    "fi": 2768.0,
+    "winner": "FConn",
+    "p": 0.00017761066068896375,
+    "pred": "Fiedler",
+    "correct": false,
+    "beta_e": 0.084
+  }
+]
