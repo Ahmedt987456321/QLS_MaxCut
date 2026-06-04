@@ -6,6 +6,7 @@ momentum-damped k update, pool persistence on restart.
 
 import time
 import numpy as np
+import networkx as nx
 from src.gain_cache import GainCache
 from src.local_search import one_flip_ls, compute_cut_value, random_cut
 from src.qubo import build_local_qubo, merge_proposal
@@ -14,11 +15,46 @@ from src.gain_cache import GainCache
 
 
 
+
+def _overlap_components(G, xA, xB):
+    """Connected components of the disagreement set between xA, xB,
+    after spin-reversal alignment. Largest-first list of vertex sets."""
+    nodes = list(G.nodes())
+    agree = sum(1 for v in nodes if xA[v] == xB[v])
+    if agree < len(nodes) / 2:
+        xB = {v: 1 - xB[v] for v in nodes}
+    N = [v for v in nodes if xA[v] != xB[v]]
+    if not N:
+        return []
+    HN = G.subgraph(N)
+    return sorted((set(c) for c in nx.connected_components(HN)),
+                  key=len, reverse=True)
+
+
+def _cluster_move(G, x, x_other):
+    """Flip the best-improving disagreement component of x vs x_other.
+    Returns (new_x, gain). gain=0 and x unchanged if no improvement."""
+    comps = _overlap_components(G, x, x_other)
+    if not comps:
+        return dict(x), 0.0
+    base = compute_cut_value(G, x)
+    best_x, best_gain = dict(x), 0.0
+    for comp in comps[:8]:   # try the largest few components
+        xc = dict(x)
+        for v in comp:
+            xc[v] = 1 - xc[v]
+        g = compute_cut_value(G, xc) - base
+        if g > best_gain:
+            best_gain, best_x = g, xc
+    return best_x, best_gain
+
+
 def adaptive_qls(G, budget_seconds, selector, backend,
                  k_min=5, k_max=30, n_reads=100,
                  best_known=None, seed=None,
                  acceptance='improvement',
-                 T_initial=2.0, T_min=0.001, cooling=0.995):
+                 T_initial=2.0, T_min=0.001, cooling=0.995,
+                 cluster_moves=False, cluster_interval=20):
     """
     Adaptive QLS — pluggable selector, EMA trigger, adaptive k.
 
@@ -46,13 +82,21 @@ def adaptive_qls(G, budget_seconds, selector, backend,
 
     nodes = list(G.nodes())
 
+
+
     # ── pool warm-start: 5 diversified cuts ──────────────────────
+    # Cap at 20% of budget to handle large dense graphs
     pool = []
+    warmstart_deadline = time.time() + 0.2 * budget_seconds
     for i in range(5):
+        if time.time() > warmstart_deadline:
+            break
         x_init = random_cut(G, rng)
         gc_temp = GainCache()
         x_opt, gc_temp, _, _ = one_flip_ls(G, x_init, gc_temp)
         pool.append(dict(x_opt))
+    if not pool:
+        pool.append(dict(random_cut(G, rng)))
 
     # start from best pool solution
     x = max(pool, key=lambda p: compute_cut_value(G, p))
@@ -121,7 +165,7 @@ def adaptive_qls(G, budget_seconds, selector, backend,
         x_prop = merge_proposal(x, x_local, S)
 
         # ── Phase 5b: look-ahead — run descent before accepting ───
-        if acceptance == 'lookahead':
+        if acceptance in ('lookahead', 'walk'):
             gc_temp = GainCache()
             x_prop, gc_temp, _, _ = one_flip_ls(G, x_prop, gc_temp)
 
@@ -181,6 +225,27 @@ def adaptive_qls(G, budget_seconds, selector, backend,
 
         # ── Phase 7: EMA update ───────────────────────────────────
         ema_esc = alpha * float(delta > 0) + (1 - alpha) * ema_esc
+
+        # ── Phase 7b: overlap cluster move (toggle) ─────────
+        if cluster_moves:
+            adaptive_qls._cm_counter = getattr(
+                adaptive_qls, '_cm_counter', 0) + 1
+            if adaptive_qls._cm_counter % cluster_interval == 0 and len(pool) >= 2:
+                # MOST-DIFFERENT pool member (max disagreement) -- supplies
+                # the most exploitable overlap structure for the cluster move
+                def _disagree(p):
+                    return sum(1 for v in nodes if p[v] != x[v])
+                x_other = max(pool, key=_disagree)
+                x_cm, g_cm = _cluster_move(G, x, x_other)
+                if g_cm > 0:
+                    x = x_cm
+                    gc.invalidate()
+                    cut_cm = compute_cut_value(G, x)
+                    if cut_cm > best_cut:
+                        best_cut = cut_cm
+                        x_best = dict(x)
+                        if best_known:
+                            metrics.check_time_to_target(best_cut, best_known)
 
         # ── Phase 8: momentum-damped k update ─────────────────────
         k_window.append(delta)
