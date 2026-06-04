@@ -1,0 +1,44 @@
+[
+  {
+    "n": 800,
+    "p": 0.0025,
+    "lam2": 0.03219564375448052,
+    "beta_e": 0.08720595213883804,
+    "fc": 349.5,
+    "fi": 319.5,
+    "winner": "FConn",
+    "pval": 5.231472556367987e-10,
+    "pred_lam2": "Fiedler",
+    "pred_beta": "Fiedler",
+    "lam2_correct": false,
+    "beta_correct": false
+  },
+  {
+    "n": 1200,
+    "p": 0.0016666666666666668,
+    "lam2": 0.02540971564291884,
+    "beta_e": 0.08349898086766683,
+    "fc": 527.0,
+    "fi": 474.0,
+    "winner": "FConn",
+    "pval": 2.9616906488199523e-11,
+    "pred_lam2": "Fiedler",
+    "pred_beta": "Fiedler",
+    "lam2_correct": false,
+    "beta_correct": false
+  },
+  {
+    "n": 1600,
+    "p": 0.00125,
+    "lam2": 0.018652274850535278,
+    "beta_e": 0.07921229217061326,
+    "fc": 682.0,
+    "fi": 598.0,
+    "winner": "FConn",
+    "pval": 2.965412393895094e-11,
+    "pred_lam2": "Fiedler",
+    "pred_beta": "Fiedler",
+    "lam2_correct": false,
+    "beta_correct": false
+  }
+]
