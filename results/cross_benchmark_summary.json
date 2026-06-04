@@ -1,0 +1,64 @@
+{
+  "routing_comparison": {
+    "lambda2_correct": 15,
+    "beta_e_correct": 18,
+    "total": 18
+  },
+  "beta_e_values": {
+    "toroidal_gset": {
+      "range": [
+        0.008,
+        0.031
+      ],
+      "route": "Fiedler",
+      "correct": true
+    },
+    "d3_regular": {
+      "range": [
+        0.112,
+        0.125
+      ],
+      "route": "FConn",
+      "correct": true
+    },
+    "d4_regular": {
+      "range": [
+        0.168,
+        0.169
+      ],
+      "route": "FConn",
+      "correct": true
+    },
+    "sk_complete": {
+      "range": [
+        0.45,
+        0.5
+      ],
+      "route": "FConn",
+      "correct": true
+    },
+    "g1_dense": {
+      "value": 0.458,
+      "route": "FConn",
+      "correct": true
+    },
+    "g22_dense": {
+      "value": 0.415,
+      "route": "FConn",
+      "correct": true
+    }
+  },
+  "threshold": 0.1,
+  "lambda2_failures": [
+    "d3-reg-s0",
+    "d3-reg-s1",
+    "d3-reg-s2"
+  ],
+  "beta_failures": [],
+  "theoretical_prediction": {
+    "d3_formula": "arccos(2*sqrt(2)/3)/pi * (3/2) = 0.162",
+    "measured_d3": "0.112-0.125 (finite-n; converges to 0.162 as n->inf)",
+    "torus": "2L / (d*n) = 1/(2M) = O(1/sqrt(n)) -> 0"
+  },
+  "sk_n400": "PENDING (warm-start bug fixed; re-run needed)"
+}
