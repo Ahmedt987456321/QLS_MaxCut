@@ -1,0 +1,12 @@
+{
+  "name": "power_grid",
+  "n": 4941,
+  "beta_e": 0.0055,
+  "asym": 0.137,
+  "fc": 2326.5,
+  "fi": 2580.5,
+  "winner": "Fiedler",
+  "p": 0.000181651146091465,
+  "pred": "Fiedler",
+  "correct": true
+}
