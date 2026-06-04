@@ -1,0 +1,12 @@
+{
+  "name": "data_fem",
+  "n": 2851,
+  "beta_e": 0.017,
+  "asym": 0.18,
+  "fc": 2994.5,
+  "fi": 3034.0,
+  "winner": "Fiedler",
+  "p": 0.01373227764410448,
+  "pred": "Fiedler",
+  "correct": true
+}
