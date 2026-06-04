@@ -1,0 +1,12 @@
+{
+  "name": "3elt",
+  "n": 4720,
+  "beta_e": 0.0085,
+  "asym": 0.241,
+  "fc": 3440.0,
+  "fi": 3592.5,
+  "winner": "Fiedler",
+  "p": 0.00018267179110955002,
+  "pred": "Fiedler",
+  "correct": true
+}
