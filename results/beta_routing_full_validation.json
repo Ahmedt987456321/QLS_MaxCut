@@ -1,0 +1,317 @@
+[
+  {
+    "name": "G11",
+    "route": "fiedler",
+    "beta_e": 0.01,
+    "median": 564.0,
+    "k": 400
+  },
+  {
+    "name": "G12",
+    "route": "fiedler",
+    "beta_e": 0.0425,
+    "median": 554.0,
+    "k": 400
+  },
+  {
+    "name": "G13",
+    "route": "fiedler",
+    "beta_e": 0.04375,
+    "median": 580.0,
+    "k": 400
+  },
+  {
+    "name": "G32",
+    "route": "fiedler",
+    "beta_e": 0.02,
+    "median": 1410.0,
+    "k": 640
+  },
+  {
+    "name": "G33",
+    "route": "fiedler",
+    "beta_e": 0.025,
+    "median": 1369.0,
+    "k": 640
+  },
+  {
+    "name": "G34",
+    "route": "fiedler",
+    "beta_e": 0.02,
+    "median": 1382.0,
+    "k": 640
+  },
+  {
+    "name": "G48",
+    "route": "fiedler",
+    "beta_e": 0.016666666666666666,
+    "median": 6000.0,
+    "k": 640
+  },
+  {
+    "name": "G49",
+    "route": "fiedler",
+    "beta_e": 0.02,
+    "median": 6000.0,
+    "k": 640
+  },
+  {
+    "name": "G50",
+    "route": "fiedler",
+    "beta_e": 0.016666666666666666,
+    "median": 5764.0,
+    "k": 640
+  },
+  {
+    "name": "G1",
+    "route": "fconn",
+    "beta_e": 0.45775969962453067,
+    "median": 11541.5,
+    "k": 160
+  },
+  {
+    "name": "G22",
+    "route": "fconn",
+    "beta_e": 0.41480740370185093,
+    "median": 13202.0,
+    "k": 640
+  },
+  {
+    "name": "G14",
+    "route": "fconn",
+    "beta_e": 0.2641670217298679,
+    "median": 3033.5,
+    "k": 400
+  },
+  {
+    "name": "G15",
+    "route": "fconn",
+    "beta_e": 0.26753915468783523,
+    "median": 3014.0,
+    "k": 400
+  },
+  {
+    "name": "G16",
+    "route": "fconn",
+    "beta_e": 0.2769691780821918,
+    "median": 3014.0,
+    "k": 400
+  },
+  {
+    "name": "G17",
+    "route": "fconn",
+    "beta_e": 0.2716948789372188,
+    "median": 3007.5,
+    "k": 400
+  },
+  {
+    "name": "G18",
+    "route": "fconn",
+    "beta_e": 0.2641670217298679,
+    "median": 949.0,
+    "k": 400
+  },
+  {
+    "name": "G19",
+    "route": "fconn",
+    "beta_e": 0.26753915468783523,
+    "median": 865.0,
+    "k": 400
+  },
+  {
+    "name": "G20",
+    "route": "fconn",
+    "beta_e": 0.2769691780821918,
+    "median": 903.5,
+    "k": 400
+  },
+  {
+    "name": "G21",
+    "route": "fconn",
+    "beta_e": 0.2716948789372188,
+    "median": 886.5,
+    "k": 400
+  },
+  {
+    "name": "torusg3-8",
+    "route": "fconn",
+    "beta_e": 0.1171875,
+    "median": 40676069.0,
+    "k": 400
+  },
+  {
+    "name": "toruspm3-8-50",
+    "route": "fconn",
+    "beta_e": 0.1484375,
+    "median": 452.0,
+    "k": 400
+  },
+  {
+    "name": "torusg3-15",
+    "route": "fconn",
+    "beta_e": 0.06676543209876543,
+    "median": 257116396.0,
+    "k": 640
+  },
+  {
+    "name": "toruspm3-15-50",
+    "route": "fconn",
+    "beta_e": 0.07565432098765432,
+    "median": 2786.0,
+    "k": 640
+  },
+  {
+    "name": "delaunay_n10",
+    "route": "fiedler",
+    "beta_e": 0.02912303664921466,
+    "median": 816.5,
+    "k": 100
+  },
+  {
+    "name": "delaunay_n11",
+    "route": "fiedler",
+    "beta_e": 0.015831565203198956,
+    "median": 1587.0,
+    "k": 100
+  },
+  {
+    "name": "walshaw_data",
+    "route": "fiedler",
+    "beta_e": 0.017226528854435832,
+    "median": 3007.0,
+    "k": 400
+  },
+  {
+    "name": "walshaw_3elt",
+    "route": "fiedler",
+    "beta_e": 0.008526453869698294,
+    "median": 3376.0,
+    "k": 400
+  },
+  {
+    "name": "walshaw_add20",
+    "route": "fconn",
+    "beta_e": 0.11726078799249531,
+    "median": 1587.5,
+    "k": 400
+  },
+  {
+    "name": "power_grid",
+    "route": "fiedler",
+    "beta_e": 0.005611161662117076,
+    "median": 2339.0,
+    "k": 400
+  },
+  {
+    "name": "d3_reg_n800",
+    "route": "fconn",
+    "beta_e": 0.10666666666666667,
+    "median": 499.0,
+    "k": 400
+  },
+  {
+    "name": "d3_reg_n1200",
+    "route": "fconn",
+    "beta_e": 0.11333333333333333,
+    "median": 737.5,
+    "k": 400
+  },
+  {
+    "name": "d4_reg_n800",
+    "route": "fconn",
+    "beta_e": 0.17,
+    "median": 561.0,
+    "k": 400
+  },
+  {
+    "name": "d4_reg_n1200",
+    "route": "fconn",
+    "beta_e": 0.1675,
+    "median": 818.0,
+    "k": 400
+  },
+  {
+    "name": "d5_reg_n800",
+    "route": "fconn",
+    "beta_e": 0.207,
+    "median": 640.0,
+    "k": 320
+  },
+  {
+    "name": "d5_reg_n1200",
+    "route": "fconn",
+    "beta_e": 0.206,
+    "median": 941.5,
+    "k": 320
+  },
+  {
+    "name": "SK_n100",
+    "route": "fconn",
+    "beta_e": 0.5050505050505051,
+    "median": 323.8158952129584,
+    "k": 50
+  },
+  {
+    "name": "SK_n200",
+    "route": "fconn",
+    "beta_e": 0.5025125628140703,
+    "median": 1088.6141370549876,
+    "k": 100
+  },
+  {
+    "name": "ER_n800",
+    "route": "fconn",
+    "beta_e": 0.08481532147742818,
+    "median": 332.5,
+    "k": 306
+  },
+  {
+    "name": "ER_n1200",
+    "route": "fconn",
+    "beta_e": 0.07954545454545454,
+    "median": 518.0,
+    "k": 400
+  },
+  {
+    "name": "ER_n1600",
+    "route": "fconn",
+    "beta_e": 0.06784083496412263,
+    "median": 688.0,
+    "k": 400
+  },
+  {
+    "name": "BA_n800_m2",
+    "route": "fconn",
+    "beta_e": 0.21929824561403508,
+    "median": 531.0,
+    "k": 400
+  },
+  {
+    "name": "BA_n800_m3",
+    "route": "fconn",
+    "beta_e": 0.2781263069845253,
+    "median": 663.0,
+    "k": 400
+  },
+  {
+    "name": "WS_p0.01",
+    "route": "fiedler",
+    "beta_e": 0.011875,
+    "median": 529.0,
+    "k": 400
+  },
+  {
+    "name": "WS_p0.1",
+    "route": "fconn",
+    "beta_e": 0.065,
+    "median": 538.5,
+    "k": 400
+  },
+  {
+    "name": "WS_p0.5",
+    "route": "fconn",
+    "beta_e": 0.16375,
+    "median": 563.5,
+    "k": 400
+  }
+]
