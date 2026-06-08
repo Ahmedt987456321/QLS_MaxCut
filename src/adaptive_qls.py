@@ -161,7 +161,8 @@ def adaptive_qls(G, budget_seconds, selector, backend,
         Q = build_local_qubo(G, x, S)
         if not Q or all(abs(v) < 1e-10 for v in Q.values()):
             continue
-        x_local = backend(Q, S, n_reads=n_reads)
+        call_seed = int(rng.integers(0, 2**31 - 1))
+        x_local = backend(Q, S, n_reads=n_reads, seed=call_seed)
         x_prop = merge_proposal(x, x_local, S)
 
         # ── Phase 5b: look-ahead — run descent before accepting ───
