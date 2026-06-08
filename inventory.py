@@ -70,47 +70,67 @@ if results_dir.exists():
         print(f"{f.name:<45} {size:>8} bytes")
 
 # ── 3. Key experimental results ───────────────────────────────────
+
 section("KEY RESULTS SUMMARY")
 
-key_files = {
-    "comparison_tuned_tabu.json": "SA vs Tabu vs AQLS (tuned)",
-    "tier2_comparison.json": "Tier 2 toroidal + real-world",
-    "fconn_family_comparison.json": "FConn family (dense/expander)",
-    "selector_bakeoff.json": "FConn vs Fiedler vs EID-BFS vs beta_e",
-    "psweep.json": "P-sweep (disorder causal test)",
-}
-
-for fname, description in key_files.items():
+# SA vs Tabu vs AQLS files
+for fname, desc in [
+    ("comparison_tuned_tabu.json", "SA vs Tabu vs AQLS (tuned)"),
+    ("tier2_comparison.json", "Tier 2 toroidal + real-world"),
+    ("fconn_family_comparison.json", "FConn family (dense/expander)"),
+]:
     fpath = results_dir / fname
     if fpath.exists():
-        try:
-            data = json.loads(fpath.read_text())
-            instances = list(data.keys())
-            print(f"\n{description}")
-            print(f"  File: {fname}")
-            print(f"  Instances: {', '.join(instances[:8])}" +
-                  (" ..." if len(instances)>8 else ""))
-            # show first instance medians if available
-            first = instances[0]
-            d0 = data[first]
-            if isinstance(d0, dict) and 'AQLS' in d0:
-                for algo in ['SA','Tabu','AQLS','beta_e']:
-                    if algo in d0:
-                        vals = d0[algo]
-                        if isinstance(vals, list) and vals:
-                            med = statistics.median([float(v) for v in vals])
-                            print(f"  {first} {algo}: median={med:.1f}")
-        except Exception as e:
-            print(f"  {fname}: could not read ({e})")
+        data = json.loads(fpath.read_text())
+        instances = list(data.keys())
+        print(f"\n{desc}")
+        print(f"  Instances: {', '.join(instances[:6])}" + (" ..." if len(instances)>6 else ""))
+        first = instances[0]
+        d0 = data[first]
+        if isinstance(d0, dict):
+            for algo in ['SA','Tabu','AQLS']:
+                if algo in d0:
+                    vals = [float(v) for v in d0[algo]]
+                    print(f"  {first} {algo}: median={statistics.median(vals):.1f}")
     else:
-        print(f"\n{description}")
-        print(f"  File: {fname} -- NOT FOUND")
+        print(f"\n{desc} -- NOT FOUND")
+
+# Selector bakeoff
+fpath = results_dir / "selector_bakeoff.json"
+if fpath.exists():
+    data = json.loads(fpath.read_text())
+    instances = list(data.keys())
+    print(f"\nSelector bakeoff (FConn vs Fiedler vs EID-BFS vs beta_e)")
+    print(f"  Instances: {', '.join(instances[:6])}" + (" ..." if len(instances)>6 else ""))
+    first = instances[0]
+    d0 = data[first]
+    if isinstance(d0, dict):
+        for sel in ['FConn','Fiedler','EID-BFS','beta_e']:
+            if sel in d0:
+                vals = [float(v) for v in d0[sel]]
+                print(f"  {first} {sel}: median={statistics.median(vals):.1f}")
+else:
+    print(f"\nSelector bakeoff -- NOT FOUND")
+
+# P-sweep
+fpath = results_dir / "psweep.json"
+if fpath.exists():
+    data = json.loads(fpath.read_text())
+    p_values = list(data.keys())
+    print(f"\nP-sweep (disorder causal test)")
+    print(f"  p values tested: {', '.join(p_values)}")
+    for p in ['0.0', '0.05', '0.5']:
+        if p in data:
+            entries = data[p]
+            winners = [e['winner'] for e in entries]
+            print(f"  p={p}: winners={winners}")
+else:
+    print(f"\nP-sweep -- NOT FOUND")
 
 # ── 4. Selectors available ────────────────────────────────────────
 section("SELECTORS AVAILABLE")
 try:
     from src.selectors import get_selector
-    # try known selectors
     known = ['random','frustrated','frustrated_connected','fiedler',
              'beta_routed','energy_impact_bfs','impact','lambda2_routed',
              'adaptive_spectral','smart_adaptive','clustering','meta_rule',
@@ -123,6 +143,7 @@ try:
             print(f"  {name:<30} NOT REGISTERED")
 except Exception as e:
     print(f"  Could not load selectors: {e}")
+
 
 # ── 5. Backends available ─────────────────────────────────────────
 section("BACKENDS AVAILABLE")

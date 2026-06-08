@@ -1172,6 +1172,7 @@ def get_selector(name):
         'smart_adaptive':       select_smart_adaptive,
         'beta_routed':          select_beta_routed,
         'energy_impact_bfs':    select_energy_impact_bfs,
+        'lambda2_routed':       select_lambda2_routed,
     }
   
     
