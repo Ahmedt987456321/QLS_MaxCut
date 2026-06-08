@@ -9,6 +9,45 @@ import numpy as np
 import networkx as nx
 from src.metrics import Metrics
 
+def qubo_to_interaction_graph(Q):
+    """
+    Build an interaction graph from a QUBO dict.
+
+    Nodes: all variables appearing in Q.
+    Edges: (i,j) with weight Q[i,j] for all off-diagonal entries.
+
+    This allows spectral selectors (FConn, Fiedler, beta_routed) to work
+    on any QUBO problem by treating variable interactions as graph edges.
+
+    For Max-Cut: the interaction graph IS the original problem graph.
+    For Max-SAT: the interaction graph connects variables sharing a clause.
+    For general QUBO: connects any two variables with non-zero coupling.
+
+    Parameters
+    ----------
+    Q : dict {(i,j): float} -- QUBO coefficients
+
+    Returns
+    -------
+    G : NetworkX graph with weighted edges
+    """
+    import networkx as nx
+    G = nx.Graph()
+    for (i, j), val in Q.items():
+        if i == j:
+            if i not in G:
+                G.add_node(i)
+        else:
+            if abs(val) > 1e-10:
+                if G.has_edge(i, j):
+                    G[i][j]['weight'] += val
+                else:
+                    G.add_edge(i, j, weight=val)
+                if i not in G:
+                    G.add_node(i)
+                if j not in G:
+                    G.add_node(j)
+    return G
 
 def make_maxcut_problem(G):
     """
@@ -151,6 +190,15 @@ def adaptive_qls_general(
     metrics.start()
 
     nodes = variables
+
+    # build interaction graph from full QUBO if not provided
+    # this allows spectral selectors to work on any QUBO problem
+    if G is None:
+        # build a representative interaction graph from one init solution
+        _x_tmp = init_fn(np.random.default_rng(seed))
+        _S_tmp = list(variables)
+        _Q_tmp = qubo_fn(_x_tmp, _S_tmp)
+        G = qubo_to_interaction_graph(_Q_tmp)
 
     # ── pool warm-start ───────────────────────────────────────────
     pool = []
