@@ -1,0 +1,234 @@
+[
+  {
+    "name": "G11",
+    "beta_e": 0.01,
+    "asym": 4.761642955841347e-14,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G12",
+    "beta_e": 0.0425,
+    "asym": 0.001857644289982698,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G13",
+    "beta_e": 0.0425,
+    "asym": 0.0021516358124207876,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G32",
+    "beta_e": 0.02,
+    "asym": 2.4673875531571675e-10,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G33",
+    "beta_e": 0.025,
+    "asym": 1.0184522167452305e-10,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G34",
+    "beta_e": 0.02,
+    "asym": 2.1942743603173986e-15,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G48",
+    "beta_e": 0.016666666666666666,
+    "asym": 6.385390979350234e-13,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G49",
+    "beta_e": 0.02,
+    "asym": 8.185815001794574e-10,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G50",
+    "beta_e": 0.016666666666666666,
+    "asym": 6.923068832765325e-10,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "G1",
+    "beta_e": 0.45775969962453067,
+    "asym": 0.9790649651017486,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G22",
+    "beta_e": 0.41480740370185093,
+    "asym": 0.993151630957293,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G14",
+    "beta_e": 0.2641670217298679,
+    "asym": 0.09223776906061379,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G15",
+    "beta_e": 0.26753915468783523,
+    "asym": 0.37075040321143704,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G16",
+    "beta_e": 0.2769691780821918,
+    "asym": 0.2882303042016596,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G17",
+    "beta_e": 0.2716948789372188,
+    "asym": 0.7058410213280937,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G18",
+    "beta_e": 0.2641670217298679,
+    "asym": 0.09223776217168218,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G19",
+    "beta_e": 0.26753915468783523,
+    "asym": 0.37075039667078447,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G20",
+    "beta_e": 0.2769691780821918,
+    "asym": 0.28823030983118064,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "G21",
+    "beta_e": 0.2716948789372188,
+    "asym": 0.7058410236052068,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "torusg3-8",
+    "beta_e": 0.15625,
+    "asym": 1.5775005511400093e-15,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "toruspm3-8-50",
+    "beta_e": 0.15625,
+    "asym": 3.303218290722519e-15,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "torusg3-15",
+    "beta_e": 0.08434567901234567,
+    "asym": 0.00014506610245940883,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "toruspm3-15-50",
+    "beta_e": 0.08237037037037037,
+    "asym": 0.009431065515947856,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "delaunay_n10",
+    "beta_e": 0.02912303664921466,
+    "asym": 0.007583173956829325,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "delaunay_n11",
+    "beta_e": 0.015831565203198956,
+    "asym": 0.0949371159024,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "walshaw_data",
+    "beta_e": 0.017226528854435832,
+    "asym": 0.1802054358244068,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "walshaw_3elt",
+    "beta_e": 0.008526453869698294,
+    "asym": 0.2408012661699797,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  },
+  {
+    "name": "walshaw_add20",
+    "beta_e": 0.11726078799249531,
+    "asym": 0.976781238769644,
+    "route": "FConn",
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "name": "power_grid",
+    "beta_e": 0.00545950864422202,
+    "asym": 0.13688615318684258,
+    "route": "Fiedler",
+    "expected": "Fiedler",
+    "correct": true
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "name": "roadnet_pa_sub2000",
+  "n": 2000,
+  "beta_e": 0.0088,
+  "asym": 0.196,
+  "lam2": 0.0023,
+  "fc": 1115.0,
+  "fi": 1090.5,
+  "winner": "FConn",
+  "p": 0.0016451908101937508,
+  "pred": "Fiedler",
+  "correct": false
+}

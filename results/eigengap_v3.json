@@ -1,0 +1,50 @@
+[
+  {
+    "family": "large_gap_2lobe",
+    "connected": true,
+    "n": 800,
+    "lam2": 0.024174644647774114,
+    "lam3": 1.6450514516731545,
+    "gap": 1.6208768070253803,
+    "FConn": 887.5,
+    "Fiedler": 842.5,
+    "winner": "FConn",
+    "margin": 45.0
+  },
+  {
+    "family": "small_gap_8lobe",
+    "connected": true,
+    "n": 800,
+    "lam2": 0.00937323234056475,
+    "lam3": 0.009547150253240034,
+    "gap": 0.00017391791267528343,
+    "FConn": 868.0,
+    "Fiedler": 836.5,
+    "winner": "FConn",
+    "margin": 31.5
+  },
+  {
+    "family": "large_gap_2lobe_b",
+    "connected": true,
+    "n": 800,
+    "lam2": 0.03958950913957703,
+    "lam3": 1.9297500560284238,
+    "gap": 1.8901605468888467,
+    "FConn": 885.0,
+    "Fiedler": 847.0,
+    "winner": "FConn",
+    "margin": 38.0
+  },
+  {
+    "family": "small_gap_4lobe",
+    "connected": true,
+    "n": 800,
+    "lam2": 0.023657987878382216,
+    "lam3": 0.02374250759660251,
+    "gap": 8.451971822029392e-05,
+    "FConn": 868.5,
+    "Fiedler": 822.0,
+    "winner": "FConn",
+    "margin": 46.5
+  }
+]

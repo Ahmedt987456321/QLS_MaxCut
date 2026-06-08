@@ -1,0 +1,62 @@
+[
+  {
+    "d": 3,
+    "n": 800,
+    "fc": 491.0,
+    "fi": 461.5,
+    "winner": "FConn",
+    "p": 3.6774715987625996e-05,
+    "expected": "Fiedler",
+    "correct": false
+  },
+  {
+    "d": 3,
+    "n": 1200,
+    "fc": 743.5,
+    "fi": 682.0,
+    "winner": "FConn",
+    "p": 3.286666054464895e-11,
+    "expected": "Fiedler",
+    "correct": false
+  },
+  {
+    "d": 4,
+    "n": 800,
+    "fc": 568.0,
+    "fi": 499.0,
+    "winner": "FConn",
+    "p": 2.944995474369126e-11,
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "d": 4,
+    "n": 1200,
+    "fc": 846.0,
+    "fi": 714.0,
+    "winner": "FConn",
+    "p": 2.952404922596988e-11,
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "d": 5,
+    "n": 800,
+    "fc": 655.0,
+    "fi": 603.0,
+    "winner": "FConn",
+    "p": 1.4801253929359882e-08,
+    "expected": "FConn",
+    "correct": true
+  },
+  {
+    "d": 5,
+    "n": 1200,
+    "fc": 965.5,
+    "fi": 892.0,
+    "winner": "FConn",
+    "p": 2.9915843138518686e-11,
+    "expected": "FConn",
+    "correct": true
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "deg": 6,
+    "fn": 0.1,
+    "gaptype": "large",
+    "lam2": 0.027115135793914134,
+    "gap": 0.6593682861574528,
+    "FConn": 1616.0,
+    "Fiedler": 1575.5,
+    "winner": "FConn"
+  },
+  {
+    "deg": 6,
+    "fn": 0.1,
+    "gaptype": "small",
+    "lam2": 0.01921085005386801,
+    "gap": 0.0017726617304489219,
+    "FConn": 1611.5,
+    "Fiedler": 1573.5,
+    "winner": "FConn"
+  },
+  {
+    "deg": 6,
+    "fn": 0.5,
+    "gaptype": "large",
+    "lam2": 0.027115135793914134,
+    "gap": 0.6593682861574528,
+    "FConn": 656.5,
+    "Fiedler": 615.0,
+    "winner": "FConn"
+  },
+  {
+    "deg": 6,
+    "fn": 0.5,
+    "gaptype": "small",
+    "lam2": 0.01921085005386801,
+    "gap": 0.0017726617304489219,
+    "FConn": 663.5,
+    "Fiedler": 635.5,
+    "winner": "FConn"
+  },
+  {
+    "deg": 12,
+    "fn": 0.1,
+    "gaptype": "large",
+    "lam2": 0.033534850648186273,
+    "gap": 2.11318795213592,
+    "FConn": 2822.5,
+    "Fiedler": 2783.5,
+    "winner": "FConn"
+  },
+  {
+    "deg": 12,
+    "fn": 0.1,
+    "gaptype": "small",
+    "lam2": 0.025160297617272873,
+    "gap": 4.413384497649678e-05,
+    "FConn": 2842.0,
+    "Fiedler": 2776.0,
+    "winner": "FConn"
+  },
+  {
+    "deg": 12,
+    "fn": 0.5,
+    "gaptype": "large",
+    "lam2": 0.033534850648186273,
+    "gap": 2.11318795213592,
+    "FConn": 943.5,
+    "Fiedler": 904.5,
+    "winner": "FConn"
+  },
+  {
+    "deg": 12,
+    "fn": 0.5,
+    "gaptype": "small",
+    "lam2": 0.025160297617272873,
+    "gap": 4.413384497649678e-05,
+    "FConn": 940.5,
+    "Fiedler": 895.0,
+    "winner": "FConn"
+  }
+]

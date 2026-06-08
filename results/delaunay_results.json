@@ -1,0 +1,24 @@
+[
+  {
+    "name": "delaunay_n10",
+    "n": 1024,
+    "beta_e": 0.0291,
+    "fc": 852.0,
+    "fi": 833.5,
+    "winner": "FConn",
+    "p": 0.00019853308561078181,
+    "pred": "Fiedler",
+    "correct": false
+  },
+  {
+    "name": "delaunay_n11",
+    "n": 2048,
+    "beta_e": 0.0158,
+    "fc": 1619.5,
+    "fi": 1606.0,
+    "winner": "FConn",
+    "p": 0.008055400258828201,
+    "pred": "Fiedler",
+    "correct": false
+  }
+]
