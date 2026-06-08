@@ -1,4 +1,9 @@
-venv/
+.idea/
+tn_env/
+qls_maxcut.egg-info/
+*.jl
+tn_*.json
+tn_append.txt
+install.cmd
 __pycache__/
 *.pyc
-.ipynb_checkpoints/
