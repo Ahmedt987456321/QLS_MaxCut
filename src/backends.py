@@ -7,9 +7,12 @@ All backends share the same interface:
 import numpy as np
 import dimod
 from dwave.samplers import SimulatedAnnealingSampler as _NealSampler
-from simulated_bifurcation import maximize
-from simulated_bifurcation.optimizer.simulated_bifurcation_engine import SimulatedBifurcationEngine
-
+try:
+    from simulated_bifurcation import maximize
+    from simulated_bifurcation.optimizer.simulated_bifurcation_engine import SimulatedBifurcationEngine
+    _SBM_AVAILABLE = True
+except ImportError:
+    _SBM_AVAILABLE = False
 
 def backend_exact(Q, S, n_reads=None, init=None):
     """
@@ -55,7 +58,7 @@ def backend_exact(Q, S, n_reads=None, init=None):
     return best_x
 
 
-def backend_neal(Q, S, n_reads=100, init=None):
+def backend_neal(Q, S, n_reads=100, init=None, seed=None):
     """
     Simulated annealing via D-Wave neal.
     Quantum-inspired classical baseline.
@@ -91,7 +94,8 @@ def backend_neal(Q, S, n_reads=100, init=None):
     response = sampler.sample(
         bqm,
         num_reads=n_reads,
-        initial_states=initial_states
+        initial_states=initial_states,
+        seed=seed
     )
 
     best_sample = response.first.sample
@@ -304,11 +308,51 @@ def backend_tn(Q, S, n_reads=None, init=None):
     except Exception:
         return backend_neal(Q, S, n_reads=n_reads or 100, init=init)
 
+def backend_kerberos(Q, S, n_reads=100, init=None, seed=None):
+    """
+    Kerberos classical backend.
+    Runs Tabu + SA in parallel on the sub-QUBO subproblem.
+    Uses dwave-hybrid KerberosSampler with SimulatedAnnealingSampler
+    as the QPU substitute -- no D-Wave cloud access needed.
+
+    This is Option A: attaches D-Wave EID decomposition + Tabu + SA
+    as the inner solver inside the AQLS outer loop.
+    """
+    try:
+        import dimod
+        from hybrid.reference.kerberos import KerberosSampler
+        from dwave.samplers import SimulatedAnnealingSampler
+
+        S = list(S)
+        bqm = dimod.BinaryQuadraticModel('BINARY')
+        for (i, j), val in Q.items():
+            if i == j:
+                bqm.add_variable(i, val)
+            else:
+                bqm.add_interaction(i, j, val)
+
+        sa = SimulatedAnnealingSampler()
+        result = KerberosSampler().sample(
+            bqm,
+            max_iter=10,
+            convergence=3,
+            qpu_sampler=sa,
+            tabu_timeout=500,
+            qpu_params={'num_reads': max(10, n_reads // 10)}
+        )
+        best = result.first.sample
+        return {v: best.get(v, 0) for v in S}
+
+    except Exception as e:
+        import warnings
+        warnings.warn(f'backend_kerberos failed ({e}), falling back to neal')
+        return backend_neal(Q, S, n_reads=n_reads, init=init, seed=seed)
 
 def get_backend(name):
     """Factory -- returns backend by name ('exact','neal','sqa','tn')."""
     backends = {"exact": backend_exact, "neal": backend_neal,
-                "sqa": backend_sqa, "tn": backend_tn}
+                "sqa": backend_sqa, "tn": backend_tn,
+                "kerberos": backend_kerberos}
     if name not in backends:
         raise ValueError(
             f"Unknown backend '{name}'. Choose from: {list(backends.keys())}")

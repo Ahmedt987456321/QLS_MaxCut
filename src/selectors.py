@@ -1111,6 +1111,39 @@ def select_beta_routed(G, gc, k, pool=None, rng=None, x=None,
     else:
         return select_frustrated_connected(G, gc, k, pool=pool, rng=rng, x=x)
 
+def select_energy_impact_bfs(G, gc, k, pool=None, rng=None, x=None):
+    """
+    Energy-impact BFS selector.
+    Faithful reimplementation of D-Wave EnergyImpactDecomposer(traversal='bfs').
+    Verified against dwave-hybrid source via research survey (session index 15).
+    Seed: highest signed gc.gain[v] (most strongly determined vertex).
+    Growth: nx.bfs_edges FIFO adjacency order -- energy does NOT drive growth.
+    Reseed from next highest-gain unvisited vertex if component exhausted.
+    Opposite of FConn: FConn seeds from lowest |gain|, this from highest.
+    """
+    import networkx as nx
+    gc.assert_valid()
+    nodes = list(G.nodes())
+    if len(nodes) <= k:
+        return nodes
+    ranked = sorted(nodes, key=lambda v: gc.gain[v], reverse=True)
+    S = []
+    visited = set()
+    for seed in ranked:
+        if seed in visited:
+            continue
+        if len(S) >= k:
+            break
+        S.append(seed)
+        visited.add(seed)
+        for _, nbr in nx.bfs_edges(G, seed):
+            if len(S) >= k:
+                break
+            if nbr not in visited:
+                S.append(nbr)
+                visited.add(nbr)
+    return S[:k]
+
 def get_selector(name):
     """
     Factory function — returns selector by name.
@@ -1138,6 +1171,7 @@ def get_selector(name):
         'adaptive_spectral':    select_adaptive_spectral,
         'smart_adaptive':       select_smart_adaptive,
         'beta_routed':          select_beta_routed,
+        'energy_impact_bfs':    select_energy_impact_bfs,
     }
   
     
