@@ -1,0 +1,47 @@
+[
+  {
+    "name": "BA_n800_m2",
+    "type": "scale-free",
+    "fc": 528.5,
+    "fi": 480.0,
+    "winner": "FConn",
+    "p": 0.00017561553104590864,
+    "correct": true
+  },
+  {
+    "name": "BA_n800_m3",
+    "type": "scale-free",
+    "fc": 663.0,
+    "fi": 612.5,
+    "winner": "FConn",
+    "p": 0.0001806347208075351,
+    "correct": true
+  },
+  {
+    "name": "WS_n800_k4_p01",
+    "type": "small-world",
+    "fc": 537.0,
+    "fi": 503.0,
+    "winner": "FConn",
+    "p": 0.00017561553104590864,
+    "correct": true
+  },
+  {
+    "name": "WS_n800_k4_p05",
+    "type": "small-world",
+    "fc": 566.5,
+    "fi": 518.5,
+    "winner": "FConn",
+    "p": 0.0001796225049907081,
+    "correct": true
+  },
+  {
+    "name": "HK_n800_m2_p05",
+    "type": "powerlaw",
+    "fc": 522.5,
+    "fi": 478.5,
+    "winner": "FConn",
+    "p": 0.000181651146091465,
+    "correct": true
+  }
+]

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "karate_club",
+    "n": 34,
+    "m": 78,
+    "lam2": 0.46852522670139124,
+    "beta_e": 0.14102564102564102,
+    "pred": "FConn",
+    "type": "social"
+  },
+  {
+    "name": "les_miserables",
+    "n": 77,
+    "m": 254,
+    "lam2": 0.20500005436047838,
+    "beta_e": 0.18110236220472442,
+    "pred": "FConn",
+    "type": "social"
+  },
+  {
+    "name": "davis_women",
+    "n": 32,
+    "m": 89,
+    "lam2": 0.9320009889006496,
+    "beta_e": 0.1797752808988764,
+    "pred": "FConn",
+    "type": "bipartite"
+  },
+  {
+    "name": "florentine",
+    "n": 15,
+    "m": 20,
+    "lam2": 0.345923164673228,
+    "beta_e": 0.2,
+    "pred": "FConn",
+    "type": "social"
+  },
+  {
+    "name": "BA_n800_m2",
+    "n": 800,
+    "m": 1596,
+    "lam2": 0.5119171735505849,
+    "beta_e": 0.21929824561403508,
+    "pred": "FConn",
+    "type": "scale-free"
+  },
+  {
+    "name": "BA_n800_m3",
+    "n": 800,
+    "m": 2391,
+    "lam2": 1.236904862721304,
+    "beta_e": 0.2781263069845253,
+    "pred": "FConn",
+    "type": "scale-free"
+  },
+  {
+    "name": "BA_n1600_m2",
+    "n": 1600,
+    "m": 3196,
+    "lam2": 0.524251180967471,
+    "beta_e": 0.20682102628285357,
+    "pred": "FConn",
+    "type": "scale-free"
+  },
+  {
+    "name": "WS_n800_k4_p01",
+    "n": 800,
+    "m": 1600,
+    "lam2": 0.05729241126137566,
+    "beta_e": 0.065,
+    "pred": "FConn",
+    "type": "small-world"
+  },
+  {
+    "name": "WS_n800_k4_p05",
+    "n": 800,
+    "m": 1600,
+    "lam2": 0.4257570635036072,
+    "beta_e": 0.16375,
+    "pred": "FConn",
+    "type": "small-world"
+  },
+  {
+    "name": "WS_n1200_k6_p01",
+    "n": 1200,
+    "m": 3600,
+    "lam2": 0.2105508814095751,
+    "beta_e": 0.08166666666666667,
+    "pred": "FConn",
+    "type": "small-world"
+  },
+  {
+    "name": "HK_n800_m2_p05",
+    "n": 800,
+    "m": 1596,
+    "lam2": 0.334086089087401,
+    "beta_e": 0.15225563909774437,
+    "pred": "FConn",
+    "type": "powerlaw"
+  },
+  {
+    "name": "HK_n800_m3_p05",
+    "n": 800,
+    "m": 2390,
+    "lam2": 0.9675732763872592,
+    "beta_e": 0.21380753138075315,
+    "pred": "FConn",
+    "type": "powerlaw"
+  }
+]
