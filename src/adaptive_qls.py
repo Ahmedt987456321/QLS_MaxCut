@@ -54,7 +54,9 @@ def adaptive_qls(G, budget_seconds, selector, backend,
                  best_known=None, seed=None,
                  acceptance='improvement',
                  T_initial=2.0, T_min=0.001, cooling=0.995,
-                 cluster_moves=False, cluster_interval=20):
+                 cluster_moves=False, cluster_interval=20,
+                 max_calls=None):
+               
     """
     Adaptive QLS — pluggable selector, EMA trigger, adaptive k.
 
@@ -89,7 +91,7 @@ def adaptive_qls(G, budget_seconds, selector, backend,
     pool = []
     warmstart_deadline = time.time() + 0.2 * budget_seconds
     for i in range(5):
-        if time.time() > warmstart_deadline:
+        if max_calls is None and time.time() > warmstart_deadline:
             break
         x_init = random_cut(G, rng)
         gc_temp = GainCache()
@@ -112,8 +114,10 @@ def adaptive_qls(G, budget_seconds, selector, backend,
     k_window = []          # gain window for k update — item 13
     k_cooldown = 0         # prevent k oscillation
     k_trend_count = 0      # consecutive consistent trends needed
+    qls_call_count = 0     # for fixed-iteration reproducible mode
 
-    while time.time() - metrics.start_time < budget_seconds:
+    while (qls_call_count < max_calls) if max_calls is not None \
+          else (time.time() - metrics.start_time < budget_seconds):
 
         # ── Phase 1: classical descent ────────────────────────────
         x, gc, at_opt, n_flips = one_flip_ls(G, x, gc)
@@ -126,7 +130,8 @@ def adaptive_qls(G, budget_seconds, selector, backend,
             if best_known:
                 metrics.check_time_to_target(best_cut, best_known)
 
-        if time.time() - metrics.start_time >= budget_seconds:
+        
+        if max_calls is None and time.time() - metrics.start_time >= budget_seconds:
             break
 
         # ── Phase 2: EMA-based adaptive trigger ───────────────────
@@ -161,6 +166,7 @@ def adaptive_qls(G, budget_seconds, selector, backend,
         Q = build_local_qubo(G, x, S)
         if not Q or all(abs(v) < 1e-10 for v in Q.values()):
             continue
+        qls_call_count += 1
         call_seed = int(rng.integers(0, 2**31 - 1))
         x_local = backend(Q, S, n_reads=n_reads, seed=call_seed)
         x_prop = merge_proposal(x, x_local, S)
